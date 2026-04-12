@@ -1,0 +1,138 @@
+{
+  "NAV": {
+    "HOME": "الرئيسية",
+    "PROJECTS": "المشاريع",
+    "CHALLENGES": "التحديات",
+    "DASHBOARD": "لوحة التحكم",
+    "PIPELINE": "خط الإنتاج",
+    "LOGIN": "تسجيل الدخول",
+    "REGISTER": "إنشاء حساب",
+    "LOGOUT": "تسجيل الخروج",
+    "NOTIFICATIONS": "الإشعارات"
+  },
+  "HOME": {
+    "HERO_TITLE": "INNOSPARK",
+    "HERO_SUBTITLE": "تحويل مشاريع التخرج إلى حلول سوقية جاهزة",
+    "HERO_DESC": "منصة رقمية ذكية لعرض ابتكارات الجامعة، الربط مع تحديات القطاع الخاص، والمطابقة المدعومة بالذكاء الاصطناعي.",
+    "CTA_PROJECTS": "استكشف المشاريع",
+    "CTA_SUBMIT": "قدّم مشروعك",
+    "STATS_PROJECTS": "مشاريع",
+    "STATS_CHALLENGES": "تحديات",
+    "STATS_MATCHES": "مطابقات",
+    "STATS_SECTORS": "قطاعات",
+    "FEATURED_TITLE": "مشاريع مميزة",
+    "SECTORS_TITLE": "القطاعات التي نغطيها"
+  },
+  "AUTH": {
+    "LOGIN_TITLE": "مرحباً بعودتك",
+    "LOGIN_SUBTITLE": "سجّل الدخول إلى حسابك في INNOSPARK",
+    "REGISTER_TITLE": "انضم إلى INNOSPARK",
+    "REGISTER_SUBTITLE": "أنشئ حسابك وابدأ الابتكار",
+    "EMAIL": "البريد الإلكتروني",
+    "PASSWORD": "كلمة المرور",
+    "FULL_NAME": "الاسم الكامل",
+    "ROLE": "نوع الحساب",
+    "SUBMIT_LOGIN": "تسجيل الدخول",
+    "SUBMIT_REGISTER": "إنشاء حساب",
+    "NO_ACCOUNT": "ليس لديك حساب؟",
+    "HAS_ACCOUNT": "لديك حساب بالفعل؟",
+    "ROLES": {
+      "student": "طالب",
+      "supervisor": "مشرف",
+      "company": "شركة / مستثمر",
+      "evaluator": "مُقيّم"
+    }
+  },
+  "PROJECTS": {
+    "TITLE": "المعرض الافتراضي",
+    "SUBTITLE": "استكشف مشاريع التخرج المبتكرة",
+    "SEARCH": "ابحث عن مشاريع...",
+    "FILTER_SECTOR": "تصفية حسب القطاع",
+    "FILTER_READINESS": "تصفية حسب الجاهزية",
+    "ALL": "الكل",
+    "SUBMIT_TITLE": "قدّم مشروعك",
+    "SUBMIT_SUBTITLE": "شارك مشروع تخرجك مع العالم",
+    "TITLE_AR": "العنوان (عربي)",
+    "TITLE_EN": "العنوان (إنجليزي)",
+    "SUMMARY_AR": "الملخص (عربي)",
+    "SUMMARY_EN": "الملخص (إنجليزي)",
+    "PROBLEM": "المشكلة المحلولة",
+    "VALUE": "القيمة المضافة",
+    "SECTOR": "القطاع",
+    "TEAM": "أعضاء الفريق",
+    "SUPERVISOR": "المشرف",
+    "TECH_OUTPUTS": "المخرجات التقنية",
+    "DEV_NEEDS": "احتياجات التطوير",
+    "VIDEO_URL": "رابط الفيديو",
+    "READINESS": "مستوى الجاهزية",
+    "FILES": "ملفات المشروع",
+    "SUBMIT": "تقديم المشروع",
+    "DETAIL_TITLE": "تفاصيل المشروع",
+    "CONTACT_TEAM": "تواصل مع الفريق",
+    "DOCUMENTS": "الوثائق",
+    "UPLOAD_FILES": "رفع الملفات"
+  },
+  "CHALLENGES": {
+    "TITLE": "تحديات القطاع الخاص",
+    "SUBTITLE": "مشكلات القطاع الخاص التي تبحث عن حلول مبتكرة",
+    "SUBMIT_TITLE": "قدّم تحدياً",
+    "SUBMIT_SUBTITLE": "صف مشكلتك الصناعية للمطابقة",
+    "CHALLENGE_TITLE": "عنوان التحدي",
+    "DESCRIPTION": "الوصف",
+    "PRIORITIES": "الأولويات",
+    "EXPECTED_OUTPUTS": "المخرجات المتوقعة",
+    "BUDGET": "الميزانية / الدعم المتاح",
+    "IS_PUBLIC": "اجعل هذا التحدي عاماً",
+    "SUBMIT": "تقديم التحدي"
+  },
+  "DASHBOARD": {
+    "TITLE": "لوحة التحليلات",
+    "TOTAL_PROJECTS": "إجمالي المشاريع",
+    "TOTAL_CHALLENGES": "إجمالي التحديات",
+    "OPEN_CHALLENGES": "التحديات المفتوحة",
+    "TOTAL_MATCHES": "إجمالي المطابقات",
+    "BY_SECTOR": "المشاريع حسب القطاع",
+    "BY_READINESS": "المشاريع حسب الجاهزية",
+    "BY_STATUS": "المشاريع حسب الحالة",
+    "MATCH_STATS": "إحصائيات المطابقة"
+  },
+  "PIPELINE": {
+    "TITLE": "خط إنتاج المشاريع",
+    "SUBTITLE": "تتبع تقدم المشاريع عبر المراحل",
+    "ADVANCE": "تقديم",
+    "STAGES": {
+      "submitted": "مُقدَّم",
+      "under_review": "قيد المراجعة",
+      "incubation": "احتضان",
+      "partnership": "شراكة",
+      "marketed": "تم التسويق"
+    }
+  },
+  "SECTORS": {
+    "health": "صحة",
+    "environment": "بيئة",
+    "energy": "طاقة",
+    "agriculture": "زراعة",
+    "industry": "صناعة",
+    "information_technology": "تكنولوجيا المعلومات",
+    "education": "تعليم",
+    "other": "أخرى"
+  },
+  "READINESS": {
+    "concept": "فكرة",
+    "prototype": "نموذج أولي",
+    "pilot_ready": "جاهز للتجربة"
+  },
+  "COMMON": {
+    "LOADING": "جاري التحميل...",
+    "ERROR": "حدث خطأ",
+    "SUCCESS": "تم بنجاح",
+    "CANCEL": "إلغاء",
+    "SAVE": "حفظ",
+    "DELETE": "حذف",
+    "EDIT": "تعديل",
+    "VIEW": "عرض التفاصيل",
+    "BACK": "رجوع",
+    "NO_DATA": "لا توجد بيانات"
+  }
+}

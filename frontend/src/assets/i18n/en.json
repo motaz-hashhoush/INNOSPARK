@@ -1,0 +1,138 @@
+{
+  "NAV": {
+    "HOME": "Home",
+    "PROJECTS": "Projects",
+    "CHALLENGES": "Challenges",
+    "DASHBOARD": "Dashboard",
+    "PIPELINE": "Pipeline",
+    "LOGIN": "Login",
+    "REGISTER": "Register",
+    "LOGOUT": "Logout",
+    "NOTIFICATIONS": "Notifications"
+  },
+  "HOME": {
+    "HERO_TITLE": "INNOSPARK",
+    "HERO_SUBTITLE": "Transforming Graduation Projects into Market-Ready Solutions",
+    "HERO_DESC": "A smart digital platform to showcase university innovations, connect with industry challenges, and enable AI-powered matching.",
+    "CTA_PROJECTS": "Explore Projects",
+    "CTA_SUBMIT": "Submit Your Project",
+    "STATS_PROJECTS": "Projects",
+    "STATS_CHALLENGES": "Challenges",
+    "STATS_MATCHES": "Matches",
+    "STATS_SECTORS": "Sectors",
+    "FEATURED_TITLE": "Featured Projects",
+    "SECTORS_TITLE": "Sectors We Cover"
+  },
+  "AUTH": {
+    "LOGIN_TITLE": "Welcome Back",
+    "LOGIN_SUBTITLE": "Sign in to your INNOSPARK account",
+    "REGISTER_TITLE": "Join INNOSPARK",
+    "REGISTER_SUBTITLE": "Create your account and start innovating",
+    "EMAIL": "Email Address",
+    "PASSWORD": "Password",
+    "FULL_NAME": "Full Name",
+    "ROLE": "Account Type",
+    "SUBMIT_LOGIN": "Sign In",
+    "SUBMIT_REGISTER": "Create Account",
+    "NO_ACCOUNT": "Don't have an account?",
+    "HAS_ACCOUNT": "Already have an account?",
+    "ROLES": {
+      "student": "Student",
+      "supervisor": "Supervisor",
+      "company": "Company / Investor",
+      "evaluator": "Evaluator"
+    }
+  },
+  "PROJECTS": {
+    "TITLE": "Virtual Booth",
+    "SUBTITLE": "Explore innovative graduation projects",
+    "SEARCH": "Search projects...",
+    "FILTER_SECTOR": "Filter by Sector",
+    "FILTER_READINESS": "Filter by Readiness",
+    "ALL": "All",
+    "SUBMIT_TITLE": "Submit Your Project",
+    "SUBMIT_SUBTITLE": "Share your graduation project with the world",
+    "TITLE_AR": "Title (Arabic)",
+    "TITLE_EN": "Title (English)",
+    "SUMMARY_AR": "Summary (Arabic)",
+    "SUMMARY_EN": "Summary (English)",
+    "PROBLEM": "Problem Solved",
+    "VALUE": "Value Proposition",
+    "SECTOR": "Sector",
+    "TEAM": "Team Members",
+    "SUPERVISOR": "Supervisor",
+    "TECH_OUTPUTS": "Technical Outputs",
+    "DEV_NEEDS": "Development Needs",
+    "VIDEO_URL": "Video URL",
+    "READINESS": "Readiness Level",
+    "FILES": "Project Files",
+    "SUBMIT": "Submit Project",
+    "DETAIL_TITLE": "Project Details",
+    "CONTACT_TEAM": "Contact Team",
+    "DOCUMENTS": "Documents",
+    "UPLOAD_FILES": "Upload Files"
+  },
+  "CHALLENGES": {
+    "TITLE": "Industry Challenges",
+    "SUBTITLE": "Private sector problems looking for innovative solutions",
+    "SUBMIT_TITLE": "Submit a Challenge",
+    "SUBMIT_SUBTITLE": "Describe your industry problem for matching",
+    "CHALLENGE_TITLE": "Challenge Title",
+    "DESCRIPTION": "Description",
+    "PRIORITIES": "Priorities",
+    "EXPECTED_OUTPUTS": "Expected Outputs",
+    "BUDGET": "Budget / Support Available",
+    "IS_PUBLIC": "Make this challenge public",
+    "SUBMIT": "Submit Challenge"
+  },
+  "DASHBOARD": {
+    "TITLE": "Analytics Dashboard",
+    "TOTAL_PROJECTS": "Total Projects",
+    "TOTAL_CHALLENGES": "Total Challenges",
+    "OPEN_CHALLENGES": "Open Challenges",
+    "TOTAL_MATCHES": "Total Matches",
+    "BY_SECTOR": "Projects by Sector",
+    "BY_READINESS": "Projects by Readiness",
+    "BY_STATUS": "Projects by Status",
+    "MATCH_STATS": "Match Statistics"
+  },
+  "PIPELINE": {
+    "TITLE": "Project Pipeline",
+    "SUBTITLE": "Track project progress through stages",
+    "ADVANCE": "Advance",
+    "STAGES": {
+      "submitted": "Submitted",
+      "under_review": "Under Review",
+      "incubation": "Incubation",
+      "partnership": "Partnership",
+      "marketed": "Marketed"
+    }
+  },
+  "SECTORS": {
+    "health": "Health",
+    "environment": "Environment",
+    "energy": "Energy",
+    "agriculture": "Agriculture",
+    "industry": "Industry",
+    "information_technology": "Information Technology",
+    "education": "Education",
+    "other": "Other"
+  },
+  "READINESS": {
+    "concept": "Concept",
+    "prototype": "Prototype",
+    "pilot_ready": "Pilot Ready"
+  },
+  "COMMON": {
+    "LOADING": "Loading...",
+    "ERROR": "An error occurred",
+    "SUCCESS": "Success",
+    "CANCEL": "Cancel",
+    "SAVE": "Save",
+    "DELETE": "Delete",
+    "EDIT": "Edit",
+    "VIEW": "View Details",
+    "BACK": "Back",
+    "NO_DATA": "No data available"
+  }
+}
