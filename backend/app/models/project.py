@@ -36,21 +36,21 @@ class Project(Base):
 
     id = Column(Integer, primary_key=True, index=True)
 
-    # Bilingual fields
-    title_ar = Column(String(500), nullable=True)
-    title_en = Column(String(500), nullable=True)
-    summary_ar = Column(Text, nullable=True)
-    summary_en = Column(Text, nullable=True)
+    # Core fields
+    title = Column(String(500), nullable=False)
+    summary = Column(Text, nullable=True)
 
     # Core details
     problem = Column(Text, nullable=False)
     value_proposition = Column(Text, nullable=True)
-    sector = Column(Enum(Sector), nullable=False, default=Sector.OTHER)
+    sector = Column(Text, nullable=True)
     team_members = Column(JSON, default=list)  # [{name, role, email}]
     supervisor_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     technical_outputs = Column(Text, nullable=True)
     development_needs = Column(Text, nullable=True)
-    video_url = Column(String(500), nullable=True)
+    attachment_url = Column("attachment_url", String(500), nullable=True)
+    dspace_uuid = Column(String(36), nullable=True)
+    collection = Column(Text, nullable=True)
 
     # Classification
     readiness_level = Column(Enum(ReadinessLevel), default=ReadinessLevel.CONCEPT)

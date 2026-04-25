@@ -19,7 +19,7 @@ import { Project } from '../../../models/interfaces';
             <h1 class="page-title">{{ 'PROJECTS.TITLE' | translate }}</h1>
             <p class="page-subtitle">{{ 'PROJECTS.SUBTITLE' | translate }}</p>
           </div>
-          <a routerLink="/projects/submit" class="btn btn-primary" *ngIf="authService.isLoggedIn()">
+          <a routerLink="/projects/submit" class="btn btn-primary" *ngIf="authService.isLoggedIn() && authService.currentUser?.role !== 'company'">
             + {{ 'PROJECTS.SUBMIT' | translate }}
           </a>
         </div>
@@ -27,12 +27,23 @@ import { Project } from '../../../models/interfaces';
         <!-- Filters -->
         <div class="filters">
           <input type="text" class="form-input search-input" [(ngModel)]="search"
-                 [placeholder]="'PROJECTS.SEARCH' | translate" (input)="loadProjects()">
-          <select class="form-select filter-select" [(ngModel)]="sectorFilter" (change)="loadProjects()">
-            <option value="">{{ 'PROJECTS.FILTER_SECTOR' | translate }}</option>
-            <option *ngFor="let s of sectors" [value]="s">{{ 'SECTORS.' + s | translate }}</option>
-          </select>
-          <select class="form-select filter-select" [(ngModel)]="readinessFilter" (change)="loadProjects()">
+                 [placeholder]="'PROJECTS.SEARCH' | translate" (input)="onFilterChange()">
+          <input type="text" class="form-input filter-select" [(ngModel)]="sectorFilter"
+                 placeholder="Filter by Sector" (input)="onFilterChange()" list="sector-options">
+          <datalist id="sector-options">
+            <option value="Health"></option>
+            <option value="Environment"></option>
+            <option value="Energy"></option>
+            <option value="Agriculture"></option>
+            <option value="Industry"></option>
+            <option value="Engineering"></option>
+            <option value="Information Technology"></option>
+            <option value="Education"></option>
+            <option value="Artificial Intelligence"></option>
+            <option value="Biotechnology"></option>
+            <option value="Other"></option>
+          </datalist>
+          <select class="form-select filter-select" [(ngModel)]="readinessFilter" (change)="onFilterChange()">
             <option value="">{{ 'PROJECTS.FILTER_READINESS' | translate }}</option>
             <option value="concept">{{ 'READINESS.concept' | translate }}</option>
             <option value="prototype">{{ 'READINESS.prototype' | translate }}</option>
@@ -48,10 +59,10 @@ import { Project } from '../../../models/interfaces';
             <span class="badge" [ngClass]="getReadinessBadge(project.readiness_level)">
               {{ 'READINESS.' + project.readiness_level | translate }}
             </span>
-            <span class="badge badge-primary">{{ 'SECTORS.' + project.sector | translate }}</span>
+            <span class="badge badge-primary">{{ project.sector }}</span>
           </div>
-          <h3 class="card-title">{{ project.title_en || project.title_ar }}</h3>
-          <p class="card-desc">{{ (project.summary_en || project.summary_ar || project.problem) | slice:0:120 }}...</p>
+          <h3 class="card-title">{{ project.title }}</h3>
+          <p class="card-desc">{{ (project.summary || project.problem) | slice:0:120 }}...</p>
           <div class="card-footer">
             <span class="card-team" *ngIf="project.team_members?.length">
               👥 {{ project.team_members.length }} members
@@ -59,6 +70,13 @@ import { Project } from '../../../models/interfaces';
             <span class="card-date">{{ project.created_at | date:'mediumDate' }}</span>
           </div>
         </a>
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination-controls" *ngIf="projects.length > 0 && projects.length < total">
+        <button class="btn btn-outline" (click)="loadMore()" [disabled]="loading">
+          {{ loading ? ('COMMON.LOADING' | translate) : 'Load More' }}
+        </button>
       </div>
 
       <div class="empty-state" *ngIf="projects.length === 0 && !loading">
@@ -89,6 +107,7 @@ import { Project } from '../../../models/interfaces';
       font-size: 0.85rem; color: var(--text-muted);
     }
     .empty-state, .loading-state { text-align: center; padding: 4rem; color: var(--text-muted); font-size: 1.1rem; }
+    .pagination-controls { display: flex; justify-content: center; margin-top: 2rem; }
   `],
 })
 export class ProjectListComponent implements OnInit {
@@ -97,24 +116,45 @@ export class ProjectListComponent implements OnInit {
   search = '';
   sectorFilter = '';
   readinessFilter = '';
-  sectors = ['health', 'environment', 'energy', 'agriculture', 'industry', 'information_technology', 'education', 'other'];
+  total = 0;
+  skip = 0;
+  limit = 20;
 
-  constructor(public authService: AuthService, private api: ApiService) {}
+  constructor(public authService: AuthService, private api: ApiService) { }
 
   ngOnInit(): void {
     this.loadProjects();
   }
 
-  loadProjects(): void {
+  loadProjects(reset = false): void {
+    if (reset) {
+      this.skip = 0;
+      this.projects = [];
+    }
     this.loading = true;
     this.api.getProjects({
       search: this.search || undefined,
       sector: this.sectorFilter || undefined,
       readiness: this.readinessFilter || undefined,
+      skip: this.skip,
+      limit: this.limit
     }).subscribe({
-      next: (res) => { this.projects = res.projects; this.loading = false; },
+      next: (res) => { 
+        this.projects = reset ? res.projects : [...this.projects, ...res.projects];
+        this.total = res.total;
+        this.loading = false; 
+      },
       error: () => { this.loading = false; },
     });
+  }
+
+  onFilterChange(): void {
+    this.loadProjects(true);
+  }
+
+  loadMore(): void {
+    this.skip += this.limit;
+    this.loadProjects(false);
   }
 
   getReadinessBadge(level: string): string {

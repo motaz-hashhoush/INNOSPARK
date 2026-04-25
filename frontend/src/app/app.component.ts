@@ -36,7 +36,10 @@ import { AuthService } from './core/services/auth.service';
           </ng-container>
 
           <ng-container *ngIf="authService.isLoggedIn()">
-            <span class="user-name">{{ (authService.currentUser$ | async)?.full_name }}</span>
+            <div class="user-profile" *ngIf="authService.currentUser$ | async as user">
+              <span class="user-role badge-glass">{{ user.role | uppercase }}</span>
+              <span class="user-name">{{ user.full_name || user.email }}</span>
+            </div>
             <button class="btn btn-outline" (click)="logout()">{{ 'NAV.LOGOUT' | translate }}</button>
           </ng-container>
         </div>
@@ -107,7 +110,15 @@ import { AuthService } from './core/services/auth.service';
       transition: all 0.2s;
     }
     .lang-btn:hover { background: rgba(99, 102, 241, 0.2); }
-    .user-name { color: #e2e8f0; font-weight: 500; font-size: 0.9rem; }
+    .user-profile { display: flex; align-items: center; gap: 0.6rem; margin-right: 0.5rem; }
+    .user-name { color: #e2e8f0; font-weight: 600; font-size: 0.95rem; }
+    .user-role.badge-glass {
+      background: linear-gradient(135deg, rgba(99,102,241,0.2), rgba(192,132,252,0.2));
+      border: 1px solid rgba(192,132,252,0.3);
+      color: #e879f9; padding: 0.25rem 0.6rem; border-radius: 20px;
+      font-size: 0.7rem; font-weight: 800; letter-spacing: 0.5px;
+      box-shadow: 0 0 10px rgba(192,132,252,0.1);
+    }
 
     .btn {
       padding: 0.5rem 1.2rem; border-radius: 10px; font-weight: 600;

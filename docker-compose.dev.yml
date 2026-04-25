@@ -1,9 +1,13 @@
 services:
   backend:
     build: ./backend
-    restart: always
     ports:
       - "4000:8000"
+    volumes:
+      - ./backend:/app
+      - uploads_data:/app/uploads
+    # Added --reload for hot reload
+    command: sh -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@host.docker.internal:5432/${POSTGRES_DB:-innospark}
       SECRET_KEY: ${SECRET_KEY:-change-this-to-a-secure-random-string}
@@ -11,14 +15,17 @@ services:
       ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES:-60}
       UPLOAD_DIR: /app/uploads
       AI_MODEL_NAME: ${AI_MODEL_NAME:-all-MiniLM-L6-v2}
-    volumes:
-      - uploads_data:/app/uploads
 
   frontend:
-    build: ./frontend
-    restart: always
+    # Use Node image directly for development to support ng serve
+    image: node:20-alpine
+    working_dir: /app
     ports:
-      - "4200:80"
+      - "4200:4200"
+    volumes:
+      - ./frontend:/app
+    # Run ng serve with polling for reliable hot reload on Windows
+    command: sh -c "npm install && npm start -- --host 0.0.0.0 --poll 2000 --proxy-config proxy.conf.json"
     depends_on:
       - backend
 

@@ -22,10 +22,8 @@ export interface ProjectFile {
 
 export interface Project {
   id: number;
-  title_ar: string;
-  title_en: string;
-  summary_ar: string;
-  summary_en: string;
+  title: string;
+  summary: string;
   problem: string;
   value_proposition: string;
   sector: string;
@@ -33,13 +31,15 @@ export interface Project {
   supervisor_id: number;
   technical_outputs: string;
   development_needs: string;
-  video_url: string;
+  attachment_url: string;
   readiness_level: 'concept' | 'prototype' | 'pilot_ready';
   status: 'submitted' | 'under_review' | 'incubation' | 'partnership' | 'marketed';
   created_by: number;
   created_at: string;
   updated_at: string;
   files: ProjectFile[];
+  dspace_uuid?: string;
+  collection?: string;
 }
 
 export interface Challenge {

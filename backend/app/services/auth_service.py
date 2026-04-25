@@ -41,5 +41,5 @@ def authenticate_user(db: Session, email: str, password: str) -> User:
 
 def create_user_token(user: User) -> dict:
     """Create JWT token for a user."""
-    token = create_access_token(data={"sub": user.id, "role": user.role.value})
+    token = create_access_token(data={"sub": str(user.id), "role": user.role.value})
     return {"access_token": token, "token_type": "bearer"}

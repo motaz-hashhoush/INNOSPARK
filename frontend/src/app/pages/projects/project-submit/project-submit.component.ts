@@ -16,26 +16,14 @@ import { ApiService } from '../../../core/services/api.service';
         <p class="page-subtitle">{{ 'PROJECTS.SUBMIT_SUBTITLE' | translate }}</p>
 
         <form (ngSubmit)="onSubmit()" class="submit-form">
-          <div class="grid grid-2">
             <div class="form-group">
-              <label class="form-label">{{ 'PROJECTS.TITLE_EN' | translate }}</label>
-              <input type="text" class="form-input" [(ngModel)]="project.title_en" name="titleEn">
+              <label class="form-label">{{ 'PROJECTS.PROJECT_TITLE' | translate }} *</label>
+              <input type="text" class="form-input" [(ngModel)]="project.title" name="title" required>
             </div>
-            <div class="form-group">
-              <label class="form-label">{{ 'PROJECTS.TITLE_AR' | translate }}</label>
-              <input type="text" class="form-input" [(ngModel)]="project.title_ar" name="titleAr" dir="rtl">
-            </div>
-          </div>
 
-          <div class="grid grid-2">
-            <div class="form-group">
-              <label class="form-label">{{ 'PROJECTS.SUMMARY_EN' | translate }}</label>
-              <textarea class="form-textarea" [(ngModel)]="project.summary_en" name="summaryEn"></textarea>
-            </div>
-            <div class="form-group">
-              <label class="form-label">{{ 'PROJECTS.SUMMARY_AR' | translate }}</label>
-              <textarea class="form-textarea" [(ngModel)]="project.summary_ar" name="summaryAr" dir="rtl"></textarea>
-            </div>
+          <div class="form-group">
+            <label class="form-label">{{ 'PROJECTS.SUMMARY' | translate }}</label>
+            <textarea class="form-textarea" [(ngModel)]="project.summary" name="summary"></textarea>
           </div>
 
           <div class="form-group">
@@ -51,9 +39,7 @@ import { ApiService } from '../../../core/services/api.service';
           <div class="grid grid-2">
             <div class="form-group">
               <label class="form-label">{{ 'PROJECTS.SECTOR' | translate }}</label>
-              <select class="form-select" [(ngModel)]="project.sector" name="sector">
-                <option *ngFor="let s of sectors" [value]="s">{{ 'SECTORS.' + s | translate }}</option>
-              </select>
+              <input type="text" class="form-input" [(ngModel)]="project.sector" name="sector" placeholder="e.g. Engineering, Health, AI...">
             </div>
             <div class="form-group">
               <label class="form-label">{{ 'PROJECTS.READINESS' | translate }}</label>
@@ -131,7 +117,7 @@ import { ApiService } from '../../../core/services/api.service';
 })
 export class ProjectSubmitComponent {
   project: any = {
-    title_en: '', title_ar: '', summary_en: '', summary_ar: '',
+    title: '', summary: '',
     problem: '', value_proposition: '', sector: 'other',
     readiness_level: 'concept', technical_outputs: '', development_needs: '', video_url: '',
   };

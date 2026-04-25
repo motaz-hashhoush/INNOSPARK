@@ -11,34 +11,34 @@ class TeamMember(BaseModel):
 
 
 class ProjectCreate(BaseModel):
-    title_ar: Optional[str] = None
-    title_en: Optional[str] = None
-    summary_ar: Optional[str] = None
-    summary_en: Optional[str] = None
+    title: str
+    summary: Optional[str] = None
     problem: str
     value_proposition: Optional[str] = None
-    sector: Sector = Sector.OTHER
+    sector: Optional[str] = "other"
     team_members: List[TeamMember] = []
     supervisor_id: Optional[int] = None
     technical_outputs: Optional[str] = None
     development_needs: Optional[str] = None
-    video_url: Optional[str] = None
+    attachment_url: Optional[str] = None
+    dspace_uuid: Optional[str] = None
+    collection: Optional[str] = None
     readiness_level: ReadinessLevel = ReadinessLevel.CONCEPT
 
 
 class ProjectUpdate(BaseModel):
-    title_ar: Optional[str] = None
-    title_en: Optional[str] = None
-    summary_ar: Optional[str] = None
-    summary_en: Optional[str] = None
+    title: Optional[str] = None
+    summary: Optional[str] = None
     problem: Optional[str] = None
     value_proposition: Optional[str] = None
-    sector: Optional[Sector] = None
+    sector: Optional[str] = None
     team_members: Optional[List[TeamMember]] = None
     supervisor_id: Optional[int] = None
     technical_outputs: Optional[str] = None
     development_needs: Optional[str] = None
-    video_url: Optional[str] = None
+    attachment_url: Optional[str] = None
+    dspace_uuid: Optional[str] = None
+    collection: Optional[str] = None
     readiness_level: Optional[ReadinessLevel] = None
     status: Optional[ProjectStatus] = None
 
@@ -56,18 +56,18 @@ class ProjectFileResponse(BaseModel):
 
 class ProjectResponse(BaseModel):
     id: int
-    title_ar: Optional[str]
-    title_en: Optional[str]
-    summary_ar: Optional[str]
-    summary_en: Optional[str]
+    title: str
+    summary: Optional[str]
     problem: str
     value_proposition: Optional[str]
-    sector: Sector
+    sector: Optional[str]
     team_members: list
     supervisor_id: Optional[int]
     technical_outputs: Optional[str]
     development_needs: Optional[str]
-    video_url: Optional[str]
+    attachment_url: Optional[str]
+    dspace_uuid: Optional[str]
+    collection: Optional[str]
     readiness_level: ReadinessLevel
     status: ProjectStatus
     created_by: int

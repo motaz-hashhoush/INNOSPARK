@@ -34,8 +34,8 @@ def get_pipeline_stages(
             "projects": [
                 {
                     "id": p.id,
-                    "title": p.title_en or p.title_ar,
-                    "sector": p.sector.value,
+                    "title": p.title,
+                    "sector": p.sector,
                     "readiness": p.readiness_level.value,
                 }
                 for p in projects
@@ -65,7 +65,7 @@ def advance_project(
     # Notify creator
     notification = Notification(
         user_id=project.created_by,
-        message=f"Your project '{project.title_en or project.title_ar}' has advanced from {old_status.value} to {project.status.value}",
+        message=f"Your project '{project.title}' has advanced from {old_status.value} to {project.status.value}",
         type=NotificationType.STATUS_CHANGE,
     )
     db.add(notification)
@@ -74,7 +74,7 @@ def advance_project(
 
     return {
         "project_id": project.id,
-        "title": project.title_en or project.title_ar,
+        "title": project.title,
         "previous_status": old_status.value,
         "new_status": project.status.value,
     }
@@ -97,7 +97,7 @@ def set_project_stage(
 
     notification = Notification(
         user_id=project.created_by,
-        message=f"Your project '{project.title_en or project.title_ar}' status changed from {old_status.value} to {stage.value}",
+        message=f"Your project '{project.title}' status changed from {old_status.value} to {stage.value}",
         type=NotificationType.STATUS_CHANGE,
     )
     db.add(notification)

@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func
 
 from app.database import get_db
-from app.models.project import Project, Sector, ReadinessLevel, ProjectStatus
+from app.models.project import Project, ReadinessLevel, ProjectStatus
 from app.models.challenge import Challenge, ChallengeStatus
 from app.models.match import Match, MatchStatus
 from app.models.user import User, UserRole
@@ -53,9 +53,9 @@ def get_overview(
 
     return {
         "total_projects": sum(count for _, count in projects_by_sector),
-        "projects_by_sector": {sector.value: count for sector, count in projects_by_sector},
-        "projects_by_readiness": {level.value: count for level, count in projects_by_readiness},
-        "projects_by_status": {status.value: count for status, count in projects_by_status},
+        "projects_by_sector": {(sector or "unknown"): count for sector, count in projects_by_sector},
+        "projects_by_readiness": {(level.value if level else "unknown"): count for level, count in projects_by_readiness},
+        "projects_by_status": {(status.value if status else "unknown"): count for status, count in projects_by_status},
         "total_challenges": total_challenges,
         "open_challenges": open_challenges,
         "users_by_role": {role.value: count for role, count in users_by_role},
@@ -83,13 +83,12 @@ def get_match_analytics(
     top_projects = (
         db.query(
             Project.id,
-            Project.title_en,
-            Project.title_ar,
+            Project.title,
             func.count(Match.id).label("match_count"),
             func.avg(Match.similarity_score).label("avg_score"),
         )
         .join(Match, Match.project_id == Project.id)
-        .group_by(Project.id, Project.title_en, Project.title_ar)
+        .group_by(Project.id, Project.title)
         .order_by(func.count(Match.id).desc())
         .limit(10)
         .all()
@@ -102,7 +101,7 @@ def get_match_analytics(
         "top_matched_projects": [
             {
                 "id": p.id,
-                "title": p.title_en or p.title_ar,
+                "title": p.title,
                 "match_count": p.match_count,
                 "avg_score": round(float(p.avg_score), 4),
             }

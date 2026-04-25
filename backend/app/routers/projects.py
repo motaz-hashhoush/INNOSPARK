@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models.user import User, UserRole
-from app.models.project import Project, ProjectFile, Sector, ReadinessLevel, ProjectStatus
+from app.models.project import Project, ProjectFile, ReadinessLevel, ProjectStatus
 from app.schemas.project import ProjectCreate, ProjectUpdate, ProjectResponse, ProjectListResponse, ProjectFileResponse
 from app.services.file_service import save_upload_file, delete_file
 from app.services.ai_matching import embed_project, classify_readiness
@@ -21,10 +21,8 @@ def create_project(
 ):
     """Create a new graduation project."""
     project = Project(
-        title_ar=data.title_ar,
-        title_en=data.title_en,
-        summary_ar=data.summary_ar,
-        summary_en=data.summary_en,
+        title=data.title,
+        summary=data.summary,
         problem=data.problem,
         value_proposition=data.value_proposition,
         sector=data.sector,
@@ -32,7 +30,9 @@ def create_project(
         supervisor_id=data.supervisor_id,
         technical_outputs=data.technical_outputs,
         development_needs=data.development_needs,
-        video_url=data.video_url,
+        attachment_url=data.attachment_url,
+        dspace_uuid=data.dspace_uuid,
+        collection=data.collection,
         readiness_level=data.readiness_level,
         created_by=current_user.id,
     )
@@ -54,7 +54,7 @@ def create_project(
 
 @router.get("", response_model=ProjectListResponse)
 def list_projects(
-    sector: Optional[Sector] = None,
+    sector: Optional[str] = None,
     readiness: Optional[ReadinessLevel] = None,
     status_filter: Optional[ProjectStatus] = None,
     search: Optional[str] = None,
@@ -66,7 +66,7 @@ def list_projects(
     query = db.query(Project)
 
     if sector:
-        query = query.filter(Project.sector == sector)
+        query = query.filter(Project.sector.ilike(f"%{sector}%"))
     if readiness:
         query = query.filter(Project.readiness_level == readiness)
     if status_filter:
@@ -74,10 +74,8 @@ def list_projects(
     if search:
         search_term = f"%{search}%"
         query = query.filter(
-            (Project.title_en.ilike(search_term)) |
-            (Project.title_ar.ilike(search_term)) |
-            (Project.summary_en.ilike(search_term)) |
-            (Project.summary_ar.ilike(search_term))
+            (Project.title.ilike(search_term)) |
+            (Project.summary.ilike(search_term))
         )
 
     total = query.count()
@@ -118,7 +116,7 @@ def update_project(
         setattr(project, field, value)
 
     # Re-embed if text fields changed
-    text_fields = {"title_ar", "title_en", "summary_ar", "summary_en", "problem", "value_proposition", "technical_outputs"}
+    text_fields = {"title", "summary", "problem", "value_proposition", "technical_outputs"}
     if text_fields & set(update_data.keys()):
         try:
             embed_project(db, project)

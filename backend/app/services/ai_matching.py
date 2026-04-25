@@ -50,14 +50,10 @@ def compute_similarity(embedding_a: List[float], embedding_b: List[float]) -> fl
 def build_project_text(project: Project) -> str:
     """Build a combined text representation of a project for embedding."""
     parts = []
-    if project.title_en:
-        parts.append(project.title_en)
-    if project.title_ar:
-        parts.append(project.title_ar)
-    if project.summary_en:
-        parts.append(project.summary_en)
-    if project.summary_ar:
-        parts.append(project.summary_ar)
+    if project.title:
+        parts.append(project.title)
+    if project.summary:
+        parts.append(project.summary)
     if project.problem:
         parts.append(project.problem)
     if project.value_proposition:
@@ -167,7 +163,7 @@ def run_matching(db: Session, challenge_id: int, top_k: int = 10) -> List[Match]
         # Create notification for project creator
         notification = Notification(
             user_id=project.created_by,
-            message=f"Your project '{project.title_en or project.title_ar}' matched with challenge '{challenge.title}' (score: {score:.2%})",
+            message=f"Your project '{project.title}' matched with challenge '{challenge.title}' (score: {score:.2%})",
             type=NotificationType.MATCH_FOUND,
         )
         db.add(notification)
