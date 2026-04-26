@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { ApiService } from '../../../core/services/api.service';
@@ -9,7 +10,7 @@ import { Challenge } from '../../../models/interfaces';
 @Component({
   selector: 'app-challenge-list',
   standalone: true,
-  imports: [CommonModule, RouterLink, TranslateModule],
+  imports: [CommonModule, FormsModule, RouterLink, TranslateModule],
   template: `
     <div class="page-container">
       <div class="page-header">
@@ -29,9 +30,20 @@ import { Challenge } from '../../../models/interfaces';
         <div class="card challenge-card" *ngFor="let c of challenges">
           <div class="card-top">
             <span class="badge badge-primary">{{ 'SECTORS.' + c.sector | translate }}</span>
-            <span class="badge" [ngClass]="c.status === 'open' ? 'badge-success' : 'badge-warning'">
-              {{ c.status }}
-            </span>
+            
+            <div class="status-zone">
+              <span class="badge" [ngClass]="c.status === 'open' ? 'badge-success' : 'badge-warning'" 
+                    *ngIf="!authService.hasRole('company', 'admin') || authService.currentUser?.id !== c.company_id">
+                {{ c.status }}
+              </span>
+              
+              <select class="form-select status-select" *ngIf="authService.hasRole('admin') || (authService.hasRole('company') && authService.currentUser?.id === c.company_id)"
+                      [(ngModel)]="c.status" (change)="updateChallengeStatus(c)">
+                <option value="open">Open</option>
+                <option value="matched">Matched</option>
+                <option value="closed">Closed</option>
+              </select>
+            </div>
           </div>
           <h3 class="card-title">{{ c.title }}</h3>
           <p class="card-desc">{{ c.description | slice:0:150 }}...</p>
@@ -63,7 +75,48 @@ import { Challenge } from '../../../models/interfaces';
   styles: [`
     .header-row { display: flex; justify-content: space-between; align-items: flex-start; }
     .challenge-card { display: flex; flex-direction: column; }
-    .card-top { display: flex; gap: 0.5rem; margin-bottom: 0.75rem; }
+    .card-top { display: flex; gap: 0.5rem; margin-bottom: 0.75rem; justify-content: space-between; align-items: flex-start; }
+    .status-select { 
+      appearance: none;
+      -moz-appearance: none;
+      -webkit-appearance: none;
+      padding: 0.35rem 1.8rem 0.35rem 0.85rem; 
+      font-size: 0.8rem; font-weight: 700; letter-spacing: 0.5px;
+      border-radius: 20px; 
+      background-color: rgba(30, 41, 59, 0.6);
+      color: #e2e8f0; 
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      cursor: pointer;
+      backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+      background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2394a3b8%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.7rem top 50%;
+      background-size: 0.65rem auto;
+      text-transform: uppercase;
+    }
+    .status-select:hover {
+      border-color: rgba(192, 132, 252, 0.8);
+      box-shadow: 0 0 12px rgba(192, 132, 252, 0.3);
+    }
+    .status-select:focus {
+      outline: none;
+      border-color: #c084fc;
+      box-shadow: 0 0 15px rgba(192, 132, 252, 0.4);
+    }
+    /* Style based on selected value using Angular classes via NgModel */
+    .status-select.ng-valid[ng-reflect-model="open"] {
+      border-color: rgba(52, 211, 153, 0.5); color: #10b981;
+      background-color: rgba(16, 185, 129, 0.1);
+    }
+    .status-select.ng-valid[ng-reflect-model="matched"] {
+      border-color: rgba(96, 165, 250, 0.5); color: #60a5fa;
+      background-color: rgba(59, 130, 246, 0.1);
+    }
+    .status-select.ng-valid[ng-reflect-model="closed"] {
+      border-color: rgba(248, 113, 113, 0.5); color: #f87171;
+      background-color: rgba(239, 68, 68, 0.1);
+    }
     .card-title { font-size: 1.15rem; font-weight: 700; margin-bottom: 0.5rem; }
     .card-desc { color: var(--text-secondary); font-size: 0.9rem; flex: 1; }
     .card-meta {
@@ -97,14 +150,42 @@ export class ChallengeListComponent implements OnInit {
   ngOnInit(): void {
     this.loading = true;
     this.api.getChallenges().subscribe({
-      next: (res) => { this.challenges = res.challenges; this.loading = false; },
+      next: (res) => {
+        this.challenges = res.challenges;
+        this.loading = false;
+        // Fetch existing matches for each challenge
+        this.challenges.forEach(c => this.loadMatches(c.id));
+      },
       error: () => { this.loading = false; },
+    });
+  }
+
+  loadMatches(challengeId: number): void {
+    this.api.getMatchResults(challengeId).subscribe({
+      next: (res) => {
+        if (res.matches && res.matches.length > 0) {
+          this.matchResults[challengeId] = res.matches;
+        }
+      }
     });
   }
 
   runMatch(challengeId: number): void {
     this.api.runMatching(challengeId).subscribe({
       next: (res) => { this.matchResults[challengeId] = res.matches; },
+    });
+  }
+
+  updateChallengeStatus(challenge: Challenge): void {
+    this.api.updateChallengeStatus(challenge.id, challenge.status).subscribe({
+      next: (updated) => {
+        // Option to show a toast or notification here
+      },
+      error: (err) => {
+        console.error('Failed to update status', err);
+        // Refresh to revert UI state on error
+        this.ngOnInit();
+      }
     });
   }
 }

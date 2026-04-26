@@ -69,14 +69,15 @@ import { ApiService } from '../../core/services/api.service';
     .hero-bg {
       position: absolute; inset: 0;
       background:
-        radial-gradient(ellipse at 20% 50%, rgba(99, 102, 241, 0.15) 0%, transparent 60%),
-        radial-gradient(ellipse at 80% 20%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
-        radial-gradient(ellipse at 50% 80%, rgba(192, 132, 252, 0.08) 0%, transparent 50%);
+        radial-gradient(ellipse at 20% 50%, rgba(23, 97, 141, 0.1) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 20%, rgba(56, 189, 248, 0.1) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 80%, rgba(15, 63, 93, 0.05) 0%, transparent 50%);
     }
     .hero-content { text-align: center; padding: 2rem; max-width: 800px; position: relative; z-index: 1; }
     .hero-title {
       font-size: 5rem; font-weight: 800; letter-spacing: -2px;
-      background: linear-gradient(135deg, #818cf8, #c084fc, #f0abfc);
+      text-transform: uppercase;
+      background: var(--accent-gradient);
       -webkit-background-clip: text; -webkit-text-fill-color: transparent;
       margin-bottom: 1rem;
     }

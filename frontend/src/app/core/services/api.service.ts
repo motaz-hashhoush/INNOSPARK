@@ -66,6 +66,10 @@ export class ApiService {
     return this.http.post<Challenge>(`${this.baseUrl}/challenges`, data);
   }
 
+  updateChallengeStatus(id: number, status: string): Observable<Challenge> {
+    return this.http.put<Challenge>(`${this.baseUrl}/challenges/${id}`, { status });
+  }
+
   // ── Matching ──
   runMatching(challengeId: number): Observable<{ matches: Match[]; total: number }> {
     return this.http.post<any>(`${this.baseUrl}/matching/run/${challengeId}`, {});

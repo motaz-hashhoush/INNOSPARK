@@ -75,9 +75,9 @@ import { AuthService } from './core/services/auth.service';
 
     .navbar {
       position: sticky; top: 0; z-index: 100;
-      background: rgba(15, 15, 35, 0.95);
+      background: rgba(255, 255, 255, 0.95);
       backdrop-filter: blur(20px);
-      border-bottom: 1px solid rgba(99, 102, 241, 0.15);
+      border-bottom: 1px solid rgba(23, 97, 141, 0.15);
       padding: 0 2rem;
     }
     .nav-container {
@@ -88,30 +88,30 @@ import { AuthService } from './core/services/auth.service';
     .nav-logo {
       display: flex; align-items: center; gap: 0.5rem;
       text-decoration: none; font-size: 1.4rem; font-weight: 700;
-      background: linear-gradient(135deg, #818cf8, #c084fc);
+      background: linear-gradient(135deg, #17618d, #2b8bbf);
       -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     }
     .logo-icon { font-size: 1.6rem; -webkit-text-fill-color: initial; }
     .nav-links { display: flex; gap: 1.5rem; }
     .nav-links a {
-      text-decoration: none; color: #94a3b8; font-weight: 500;
+      text-decoration: none; color: #4b5563; font-weight: 600;
       transition: color 0.2s; padding: 0.5rem 0;
       border-bottom: 2px solid transparent;
     }
     .nav-links a:hover, .nav-links a.active {
-      color: #c084fc;
-      border-bottom-color: #c084fc;
+      color: #17618d;
+      border-bottom-color: #17618d;
     }
     .nav-actions { display: flex; align-items: center; gap: 0.75rem; }
     .lang-btn {
-      background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.3);
-      color: #c084fc; padding: 0.4rem 0.8rem; border-radius: 8px;
+      background: rgba(23, 97, 141, 0.05); border: 1px solid rgba(23, 97, 141, 0.2);
+      color: #17618d; padding: 0.4rem 0.8rem; border-radius: 8px;
       cursor: pointer; font-weight: 600; font-size: 0.85rem;
       transition: all 0.2s;
     }
-    .lang-btn:hover { background: rgba(99, 102, 241, 0.2); }
+    .lang-btn:hover { background: rgba(23, 97, 141, 0.1); }
     .user-profile { display: flex; align-items: center; gap: 0.6rem; margin-right: 0.5rem; }
-    .user-name { color: #e2e8f0; font-weight: 600; font-size: 0.95rem; }
+    .user-name { color: #111827; font-weight: 600; font-size: 0.95rem; }
     .user-role.badge-glass {
       background: linear-gradient(135deg, rgba(99,102,241,0.2), rgba(192,132,252,0.2));
       border: 1px solid rgba(192,132,252,0.3);
@@ -126,21 +126,21 @@ import { AuthService } from './core/services/auth.service';
       transition: all 0.2s;
     }
     .btn-primary {
-      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      background: linear-gradient(135deg, #17618d, #0f3f5d);
       color: white; border: none;
     }
-    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4); }
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 15px rgba(23, 97, 141, 0.3); }
     .btn-outline {
-      background: transparent; color: #c084fc;
-      border: 1px solid rgba(192, 132, 252, 0.4);
+      background: transparent; color: #17618d;
+      border: 1px solid rgba(23, 97, 141, 0.4);
     }
-    .btn-outline:hover { background: rgba(192, 132, 252, 0.1); }
+    .btn-outline:hover { background: rgba(23, 97, 141, 0.05); }
 
     .main-content { flex: 1; }
 
     .footer {
-      background: rgba(10, 10, 30, 0.95);
-      border-top: 1px solid rgba(99, 102, 241, 0.1);
+      background: #ffffff;
+      border-top: 1px solid rgba(23, 97, 141, 0.1);
       padding: 2rem;
     }
     .footer-container {
@@ -149,13 +149,13 @@ import { AuthService } from './core/services/auth.service';
     }
     .footer-brand {
       display: flex; align-items: center; gap: 0.5rem;
-      color: #818cf8; font-weight: 700; font-size: 1.1rem;
+      color: #17618d; font-weight: 700; font-size: 1.1rem;
     }
-    .footer-brand p { color: #64748b; font-size: 0.8rem; margin-left: 0.5rem; font-weight: 400; }
+    .footer-brand p { color: #4b5563; font-size: 0.8rem; margin-left: 0.5rem; font-weight: 500; }
     .footer-links { display: flex; gap: 1.5rem; }
-    .footer-links a { color: #94a3b8; text-decoration: none; transition: color 0.2s; }
-    .footer-links a:hover { color: #c084fc; }
-    .footer-copy { color: #475569; font-size: 0.85rem; }
+    .footer-links a { color: #4b5563; text-decoration: none; transition: color 0.2s; font-weight: 500;}
+    .footer-links a:hover { color: #17618d; }
+    .footer-copy { color: #9ca3af; font-size: 0.85rem; }
 
     .rtl { direction: rtl; text-align: right; }
 

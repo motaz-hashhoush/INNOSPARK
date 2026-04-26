@@ -139,22 +139,22 @@ import { environment } from '../../../../environments/environment';
     .booth-attachment { padding: 0.75rem 2rem; }
     .attachment-link {
       display: inline-flex; align-items: center; gap: 0.5rem;
-      background: rgba(99,102,241,0.12); color: var(--accent-tertiary);
+      background: rgba(23, 97, 141, 0.08); color: var(--accent-primary);
       padding: 0.6rem 1.2rem; border-radius: var(--radius-md);
       text-decoration: none; font-weight: 600; font-size: 0.95rem;
-      border: 1px solid rgba(99,102,241,0.3); transition: all 0.2s;
+      border: 1px solid var(--border-subtle); transition: all 0.2s;
     }
-    .attachment-link:hover { background: rgba(99,102,241,0.25); }
+    .attachment-link:hover { background: rgba(23, 97, 141, 0.15); border-color: var(--border-hover); }
     .booth-grid { display: grid; grid-template-columns: 1fr 340px; gap: 2rem; padding: 2rem; }
     .section { margin-bottom: 1.5rem; }
     .section h3 { font-size: 1.1rem; font-weight: 700; color: var(--accent-tertiary); margin-bottom: 0.5rem; }
     .section p { color: var(--text-secondary); line-height: 1.7; }
     .text-ar { direction: rtl; text-align: right; }
     .sidebar-card {
-      background: rgba(15, 15, 40, 0.5); border: 1px solid var(--border-subtle);
+      background: var(--bg-card-hover); border: 1px solid var(--border-subtle);
       border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 1rem;
     }
-    .sidebar-card h3 { font-size: 1rem; font-weight: 700; color: var(--accent-tertiary); margin-bottom: 0.75rem; }
+    .sidebar-card h3 { font-size: 1rem; font-weight: 700; color: var(--accent-primary); margin-bottom: 0.75rem; }
     .team-list { display: flex; flex-direction: column; gap: 0.6rem; }
     .team-member { display: flex; align-items: center; gap: 0.6rem; }
     .member-avatar {
@@ -170,7 +170,7 @@ import { environment } from '../../../../environments/environment';
       text-decoration: none; padding: 0.4rem 0.6rem; border-radius: var(--radius-sm);
       transition: background 0.2s; font-size: 0.9rem;
     }
-    .file-item:hover { background: rgba(99, 102, 241, 0.1); }
+    .file-item:hover { background: rgba(23, 97, 141, 0.08); color: var(--accent-primary); }
     .loading-state { text-align: center; padding: 4rem; color: var(--text-muted); }
     @media (max-width: 768px) { .booth-grid { grid-template-columns: 1fr; } }
   `],
