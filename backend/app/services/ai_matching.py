@@ -24,7 +24,8 @@ def _get_model():
             from app.config import settings
             logger.info(f"Loading AI model: {settings.AI_MODEL_NAME}")
             _model = SentenceTransformer(settings.AI_MODEL_NAME)
-            logger.info("AI model loaded successfully")
+            _model.max_seq_length = settings.AI_MAX_SEQ_LENGTH
+            logger.info(f"AI model loaded successfully with max_seq_length: {settings.AI_MAX_SEQ_LENGTH}")
         except Exception as e:
             logger.error(f"Failed to load AI model: {e}")
             raise

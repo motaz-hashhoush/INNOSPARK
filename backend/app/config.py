@@ -20,6 +20,7 @@ class Settings(BaseSettings):
 
     # AI
     AI_MODEL_NAME: str = "all-MiniLM-L6-v2"
+    AI_MAX_SEQ_LENGTH: int = 1024
 
     class Config:
         env_file = ".env"
