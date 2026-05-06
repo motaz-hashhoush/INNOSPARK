@@ -1,5 +1,6 @@
 services:
   backend:
+    container_name: innospark
     build: ./backend
     restart: always
     ports:
@@ -15,6 +16,7 @@ services:
       - uploads_data:/app/uploads
 
   frontend:
+    container_name: innospark-frontend
     build: ./frontend
     restart: always
     ports:
