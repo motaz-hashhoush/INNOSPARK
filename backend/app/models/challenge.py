@@ -17,7 +17,9 @@ class Challenge(Base):
     __tablename__ = "challenges"
 
     id = Column(Integer, primary_key=True, index=True)
-    company_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    company_id = Column(Integer, ForeignKey("users.id"), nullable=True)  # nullable for guest sessions
+    session_token = Column(String(64), nullable=True, index=True)  # guest session identifier
+    is_guest = Column(Boolean, default=False)
 
     # Details
     title = Column(String(500), nullable=False)

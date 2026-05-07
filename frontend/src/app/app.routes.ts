@@ -27,15 +27,14 @@ export const routes: Routes = [
     path: 'projects/:id',
     loadComponent: () => import('./pages/projects/project-detail/project-detail.component').then(m => m.ProjectDetailComponent),
   },
+
   {
     path: 'challenges',
     loadComponent: () => import('./pages/challenges/challenge-list/challenge-list.component').then(m => m.ChallengeListComponent),
-    canActivate: [authGuard],
   },
   {
     path: 'challenges/submit',
     loadComponent: () => import('./pages/challenges/challenge-submit/challenge-submit.component').then(m => m.ChallengeSubmitComponent),
-    canActivate: [authGuard],
   },
   {
     path: 'dashboard',

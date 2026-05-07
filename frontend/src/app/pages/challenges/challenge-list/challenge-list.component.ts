@@ -19,12 +19,13 @@ import { Challenge } from '../../../models/interfaces';
             <h1 class="page-title">{{ 'CHALLENGES.TITLE' | translate }}</h1>
             <p class="page-subtitle">{{ 'CHALLENGES.SUBTITLE' | translate }}</p>
           </div>
-          <a routerLink="/challenges/submit" class="btn btn-primary"
-             *ngIf="authService.hasRole('company', 'admin')">
+          <a routerLink="/challenges/submit" class="btn btn-primary">
             + {{ 'CHALLENGES.SUBMIT' | translate }}
           </a>
         </div>
       </div>
+
+
 
       <div class="grid grid-3" *ngIf="challenges.length">
         <div class="card challenge-card" *ngFor="let c of challenges">
@@ -138,6 +139,43 @@ import { Challenge } from '../../../models/interfaces';
       padding: 0.15rem 0.5rem; border-radius: 10px; font-weight: 600; font-size: 0.8rem;
     }
     .empty-state { text-align: center; padding: 4rem; color: var(--text-muted); }
+
+    /* ── Guest Banner ── */
+    .guest-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.25rem;
+      flex-wrap: wrap;
+      background: linear-gradient(135deg, rgba(99,102,241,0.12), rgba(168,85,247,0.08));
+      border: 1px solid rgba(99,102,241,0.3);
+      border-radius: 16px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .guest-banner-left {
+      display: flex; align-items: center; gap: 1rem;
+    }
+    .guest-banner-icon {
+      font-size: 2rem; flex-shrink: 0;
+    }
+    .guest-banner strong {
+      display: block;
+      color: #e2e8f0; font-size: 1rem; font-weight: 700; margin-bottom: 0.2rem;
+    }
+    .guest-banner p {
+      color: #94a3b8; font-size: 0.88rem; margin: 0; line-height: 1.4;
+    }
+    .btn-gradient {
+      display: inline-block;
+      padding: 0.6rem 1.4rem; border-radius: 12px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      color: white; font-weight: 700; font-size: 0.9rem;
+      text-decoration: none; white-space: nowrap;
+      transition: all 0.2s;
+      box-shadow: 0 4px 15px rgba(99,102,241,0.3);
+    }
+    .btn-gradient:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(99,102,241,0.45); }
   `],
 })
 export class ChallengeListComponent implements OnInit {

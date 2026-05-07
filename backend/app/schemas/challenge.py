@@ -15,6 +15,15 @@ class ChallengeCreate(BaseModel):
     is_public: bool = True
 
 
+class GuestChallengeCreate(BaseModel):
+    title: str
+    description: str
+    sector: Sector
+    priorities: Optional[str] = None
+    expected_outputs: Optional[str] = None
+    session_token: str  # browser-generated UUID
+
+
 class ChallengeUpdate(BaseModel):
     title: Optional[str] = None
     description: Optional[str] = None
@@ -37,6 +46,8 @@ class ChallengeResponse(BaseModel):
     budget: Optional[float]
     is_public: bool
     status: ChallengeStatus
+    session_token: Optional[str] = None
+    is_guest: bool = False
     created_at: datetime
 
     class Config:

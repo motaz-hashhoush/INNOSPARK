@@ -161,13 +161,14 @@ def run_matching(db: Session, challenge_id: int, top_k: int = 10) -> List[Match]
 
         matches.append(match)
 
-        # Create notification for project creator
-        notification = Notification(
-            user_id=project.created_by,
-            message=f"Your project '{project.title}' matched with challenge '{challenge.title}' (score: {score:.2%})",
-            type=NotificationType.MATCH_FOUND,
-        )
-        db.add(notification)
+        # Create notification for project creator (skip for guest challenges)
+        if not challenge.is_guest and project.created_by:
+            notification = Notification(
+                user_id=project.created_by,
+                message=f"Your project '{project.title}' matched with challenge '{challenge.title}' (score: {score:.2%})",
+                type=NotificationType.MATCH_FOUND,
+            )
+            db.add(notification)
 
     db.commit()
 

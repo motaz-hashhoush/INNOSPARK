@@ -83,6 +83,18 @@ export class ApiService {
     return this.http.put<Match>(`${this.baseUrl}/matching/${matchId}/status`, { status });
   }
 
+  // ── Guest Session ──
+  guestMatch(data: {
+    title: string;
+    description: string;
+    sector: string;
+    priorities?: string;
+    expected_outputs?: string;
+    session_token: string;
+  }): Observable<{ challenge: any; matches: Match[]; total: number }> {
+    return this.http.post<any>(`${this.baseUrl}/guest/match`, data);
+  }
+
   // ── Analytics ──
   getAnalyticsOverview(): Observable<any> {
     return this.http.get(`${this.baseUrl}/analytics/overview`);

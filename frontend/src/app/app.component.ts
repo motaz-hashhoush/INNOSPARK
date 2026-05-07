@@ -20,7 +20,8 @@ import { AuthService } from './core/services/auth.service';
         <div class="nav-links">
           <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">{{ 'NAV.HOME' | translate }}</a>
           <a routerLink="/projects" routerLinkActive="active">{{ 'NAV.PROJECTS' | translate }}</a>
-          <a routerLink="/challenges" routerLinkActive="active" *ngIf="authService.isLoggedIn()">{{ 'NAV.CHALLENGES' | translate }}</a>
+          <a routerLink="/challenges" routerLinkActive="active">{{ 'NAV.CHALLENGES' | translate }}</a>
+
           <a routerLink="/dashboard" routerLinkActive="active" *ngIf="authService.isLoggedIn()">{{ 'NAV.DASHBOARD' | translate }}</a>
           <a routerLink="/pipeline" routerLinkActive="active" *ngIf="authService.hasRole('admin', 'evaluator')">{{ 'NAV.PIPELINE' | translate }}</a>
         </div>

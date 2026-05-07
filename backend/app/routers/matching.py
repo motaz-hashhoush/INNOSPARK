@@ -1,3 +1,4 @@
+from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
@@ -6,7 +7,7 @@ from app.models.user import User, UserRole
 from app.models.match import Match, MatchStatus
 from app.schemas.match import MatchResponse, MatchListResponse, MatchStatusUpdate
 from app.services.ai_matching import run_matching
-from app.utils.deps import get_current_user, require_role
+from app.utils.deps import get_current_user, require_role, get_optional_user
 
 router = APIRouter(prefix="/api/matching", tags=["AI Matching"])
 
@@ -42,9 +43,19 @@ def run_ai_matching(
 def get_match_results(
     challenge_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: Optional[User] = Depends(get_optional_user),
 ):
     """Get existing match results for a challenge."""
+    from app.models.challenge import Challenge
+    challenge = db.query(Challenge).filter(Challenge.id == challenge_id).first()
+    if not challenge:
+        raise HTTPException(status_code=404, detail="Challenge not found")
+
+    # Check visibility
+    if not challenge.is_public:
+        if not current_user or (current_user.id != challenge.company_id and current_user.role != UserRole.ADMIN):
+            raise HTTPException(status_code=403, detail="This challenge is not public")
+
     matches = (
         db.query(Match)
         .filter(Match.challenge_id == challenge_id)

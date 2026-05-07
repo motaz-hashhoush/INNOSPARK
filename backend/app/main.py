@@ -10,7 +10,7 @@ from app.config import settings
 from app.database import engine, Base
 from app.models import *  # noqa: F401 — import all models for table creation
 
-from app.routers import auth, projects, challenges, matching, analytics, pipeline, notifications
+from app.routers import auth, projects, challenges, matching, analytics, pipeline, notifications, guest
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -41,6 +41,7 @@ app.include_router(matching.router)
 app.include_router(analytics.router)
 app.include_router(pipeline.router)
 app.include_router(notifications.router)
+app.include_router(guest.router)
 
 
 @app.on_event("startup")

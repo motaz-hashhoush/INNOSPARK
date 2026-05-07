@@ -6,9 +6,9 @@ from app.database import get_db
 from app.models.user import User, UserRole
 from app.models.challenge import Challenge, ChallengeStatus
 from app.models.project import Sector
-from app.schemas.challenge import ChallengeCreate, ChallengeUpdate, ChallengeResponse, ChallengeListResponse
+from app.schemas.challenge import ChallengeCreate, ChallengeUpdate, ChallengeResponse, ChallengeListResponse, GuestChallengeCreate
 from app.services.ai_matching import embed_challenge
-from app.utils.deps import get_current_user, require_role
+from app.utils.deps import get_current_user, require_role, get_optional_user
 
 router = APIRouter(prefix="/api/challenges", tags=["Challenges"])
 
@@ -17,18 +17,20 @@ router = APIRouter(prefix="/api/challenges", tags=["Challenges"])
 def create_challenge(
     data: ChallengeCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_role(UserRole.COMPANY, UserRole.ADMIN)),
+    current_user: Optional[User] = Depends(get_optional_user),
 ):
-    """Create a new industry challenge (company or admin only)."""
+    """Create a new industry challenge. Company/Admin challenges are full-featured.
+    Guests can also submit challenges — they are saved as is_guest=True."""
     challenge = Challenge(
-        company_id=current_user.id,
+        company_id=current_user.id if current_user else None,
+        is_guest=False if current_user else True,
         title=data.title,
         description=data.description,
         sector=data.sector,
         priorities=data.priorities,
         expected_outputs=data.expected_outputs,
         budget=data.budget,
-        is_public=data.is_public,
+        is_public=data.is_public if current_user else True,  # guest challenges always public
     )
     db.add(challenge)
     db.commit()
@@ -50,13 +52,16 @@ def list_challenges(
     skip: int = 0,
     limit: int = 20,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-):
+    current_user: Optional[User] = Depends(get_optional_user),
+) -> ChallengeListResponse:
     """List challenges. Non-company users only see public challenges."""
     query = db.query(Challenge)
 
+    # Always hide guest challenges from the public feed
+    query = query.filter(Challenge.is_guest == False)
+
     # Non-admin, non-company users only see public challenges
-    if current_user.role not in (UserRole.COMPANY, UserRole.ADMIN):
+    if not current_user or current_user.role not in (UserRole.COMPANY, UserRole.ADMIN):
         query = query.filter(Challenge.is_public == True)
 
     if sector:
@@ -74,7 +79,7 @@ def list_challenges(
 def get_challenge(
     challenge_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: Optional[User] = Depends(get_optional_user),
 ):
     """Get challenge detail."""
     challenge = db.query(Challenge).filter(Challenge.id == challenge_id).first()
@@ -82,8 +87,9 @@ def get_challenge(
         raise HTTPException(status_code=404, detail="Challenge not found")
 
     # Check visibility
-    if not challenge.is_public and current_user.id != challenge.company_id and current_user.role != UserRole.ADMIN:
-        raise HTTPException(status_code=403, detail="This challenge is not public")
+    if not challenge.is_public:
+        if not current_user or (current_user.id != challenge.company_id and current_user.role != UserRole.ADMIN):
+            raise HTTPException(status_code=403, detail="This challenge is not public")
 
     return challenge
 

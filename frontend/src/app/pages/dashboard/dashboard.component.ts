@@ -115,7 +115,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
         type: 'bar',
         data: {
           labels: Object.keys(this.overview.projects_by_readiness || {}),
-          datasets: [{ label: 'Projects', data: Object.values(this.overview.projects_by_readiness || {}), backgroundColor: '#8b5cf6' }],
+          datasets: [{ label: 'Virtual Booths', data: Object.values(this.overview.projects_by_readiness || {}), backgroundColor: '#8b5cf6' }],
         },
         options: {
           responsive: true,
@@ -131,7 +131,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
         type: 'bar',
         data: {
           labels: Object.keys(this.overview.projects_by_status || {}),
-          datasets: [{ label: 'Projects', data: Object.values(this.overview.projects_by_status || {}), backgroundColor: colors.slice(0, 5) }],
+          datasets: [{ label: 'Virtual Booths', data: Object.values(this.overview.projects_by_status || {}), backgroundColor: colors.slice(0, 5) }],
         },
         options: {
           responsive: true, indexAxis: 'y',

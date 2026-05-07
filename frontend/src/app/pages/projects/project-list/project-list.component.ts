@@ -64,9 +64,6 @@ import { Project } from '../../../models/interfaces';
           <h3 class="card-title">{{ project.title }}</h3>
           <p class="card-desc">{{ (project.summary || project.problem) | slice:0:120 }}...</p>
           <div class="card-footer">
-            <span class="card-team" *ngIf="project.team_members?.length">
-              👥 {{ project.team_members.length }} members
-            </span>
             <span class="card-date">{{ project.created_at | date:'mediumDate' }}</span>
           </div>
         </a>

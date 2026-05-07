@@ -1,7 +1,7 @@
 {
   "NAV": {
     "HOME": "Home",
-    "PROJECTS": "Projects",
+    "PROJECTS": "Virtual Booth",
     "CHALLENGES": "Challenges",
     "DASHBOARD": "Dashboard",
     "PIPELINE": "Pipeline",
@@ -14,13 +14,13 @@
     "HERO_TITLE": "INNOSPARK",
     "HERO_SUBTITLE": "Transforming Graduation Projects into Market-Ready Solutions",
     "HERO_DESC": "A smart digital platform to showcase university innovations, connect with industry challenges, and enable AI-powered matching.",
-    "CTA_PROJECTS": "Explore Projects",
+    "CTA_PROJECTS": "Explore Virtual Booth",
     "CTA_SUBMIT": "Submit Your Project",
-    "STATS_PROJECTS": "Projects",
+    "STATS_PROJECTS": "Virtual Booth",
     "STATS_CHALLENGES": "Challenges",
     "STATS_MATCHES": "Matches",
     "STATS_SECTORS": "Sectors",
-    "FEATURED_TITLE": "Featured Projects",
+    "FEATURED_TITLE": "Featured Virtual Booths",
     "SECTORS_TITLE": "Sectors We Cover"
   },
   "AUTH": {
@@ -46,7 +46,7 @@
   "PROJECTS": {
     "TITLE": "Virtual Booth",
     "SUBTITLE": "Explore innovative graduation projects",
-    "SEARCH": "Search projects...",
+    "SEARCH": "Search Virtual Booths...",
     "FILTER_SECTOR": "Filter by Sector",
     "FILTER_READINESS": "Filter by Readiness",
     "ALL": "All",
@@ -85,13 +85,13 @@
   },
   "DASHBOARD": {
     "TITLE": "Analytics Dashboard",
-    "TOTAL_PROJECTS": "Total Projects",
+    "TOTAL_PROJECTS": "Total Virtual Booths",
     "TOTAL_CHALLENGES": "Total Challenges",
     "OPEN_CHALLENGES": "Open Challenges",
     "TOTAL_MATCHES": "Total Matches",
-    "BY_SECTOR": "Projects by Sector",
-    "BY_READINESS": "Projects by Readiness",
-    "BY_STATUS": "Projects by Status",
+    "BY_SECTOR": "Virtual Booths by Sector",
+    "BY_READINESS": "Virtual Booths by Readiness",
+    "BY_STATUS": "Virtual Booths by Status",
     "MATCH_STATS": "Match Statistics"
   },
   "PIPELINE": {

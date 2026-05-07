@@ -78,30 +78,7 @@ import { environment } from '../../../../environments/environment';
               <p style="color:var(--text-secondary);font-size:0.9rem;">{{ project.collection }}</p>
             </div>
 
-            <!-- DSpace UUID -->
-            <div class="sidebar-card" *ngIf="project.dspace_uuid">
-              <h3>DSpace ID</h3>
-              <p style="color:var(--text-muted);font-size:0.8rem;word-break:break-all;">{{ project.dspace_uuid }}</p>
-            </div>
 
-            <!-- Team -->
-            <div class="sidebar-card">
-              <h3>{{ 'PROJECTS.TEAM' | translate }}</h3>
-              <ng-container *ngIf="teamMembers.length > 0; else noTeam">
-                <div class="team-list">
-                  <div class="team-member" *ngFor="let m of teamMembers">
-                    <div class="member-avatar">{{ m.initial }}</div>
-                    <div>
-                      <div class="member-name">{{ m.name }}</div>
-                      <div class="member-role" *ngIf="m.role">{{ m.role }}</div>
-                    </div>
-                  </div>
-                </div>
-              </ng-container>
-              <ng-template #noTeam>
-                <p style="color:var(--text-muted);font-size:0.85rem;">No team members listed.</p>
-              </ng-template>
-            </div>
 
             <!-- Documents -->
             <div class="sidebar-card" *ngIf="project.files?.length">
