@@ -5,136 +5,129 @@ import { Router, RouterLink } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { ApiService } from '../../../core/services/api.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { RevealDirective } from '../../../shared/directives/reveal.directive';
 
 @Component({
   selector: 'app-challenge-submit',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, TranslateModule],
+  imports: [CommonModule, FormsModule, RouterLink, TranslateModule, RevealDirective],
   template: `
-    <div class="page-container">
-      <div class="form-page fade-in-up">
-        <h1 class="page-title">{{ 'CHALLENGES.SUBMIT_TITLE' | translate }}</h1>
-        <p class="page-subtitle">{{ 'CHALLENGES.SUBMIT_SUBTITLE' | translate }}</p>
+    <div class="submit-page">
+      <div class="mesh" aria-hidden="true" style="opacity: 0.25;"><span></span></div>
+      <div class="grain"></div>
 
-        <!-- Guest Info Banner -->
-        <div class="guest-info-banner" *ngIf="!authService.isLoggedIn()">
-          <span class="banner-icon">🔒</span>
-          <div class="banner-text">
-            <strong>Submitting as Guest</strong>
-            <p>
-              Your challenge will be publicly listed and AI matching will run automatically.
-              <a routerLink="/auth/register">Create an account</a> to manage your challenges, set them private, and track results over time.
-            </p>
+      <div class="container">
+        <div class="form-layout">
+          <div class="form-header">
+            <div appReveal><span class="kicker">Market Demand</span></div>
+            <div appReveal [delay]="80" style="margin-top: 18px;">
+              <h1 class="h-section">Post a <em class="serif-italic" style="color: var(--c-blue);">Challenge</em>.</h1>
+              <p class="lead">Connect your industry problem with academic innovation for real solutions.</p>
+            </div>
           </div>
+
+          <!-- Guest Info Banner -->
+          <div class="banner glass" *ngIf="!authService.isLoggedIn()" appReveal [delay]="120">
+            <span class="icon">🔒</span>
+            <div class="text">
+              <strong>Submitting as Guest</strong>
+              <p>Your challenge will be public and AI matching will run instantly. <a routerLink="/auth/register">Create account</a> to set privacy.</p>
+            </div>
+          </div>
+
+          <form (ngSubmit)="onSubmit()" class="form-card glass" appReveal [delay]="180">
+            <div class="form-grid">
+              <div class="field full">
+                <label>Challenge Title *</label>
+                <input type="text" [(ngModel)]="challenge.title" name="title" required placeholder="e.g. Optimized Logistics Data Pipeline">
+              </div>
+
+              <div class="field full">
+                <label>Detailed Description *</label>
+                <textarea [(ngModel)]="challenge.description" name="description" rows="5" required placeholder="Describe the pain points and current status..."></textarea>
+              </div>
+
+              <div class="field">
+                <label>Sector</label>
+                <select [(ngModel)]="challenge.sector" name="sector">
+                  <option *ngFor="let s of sectors" [value]="s">{{ 'SECTORS.' + s | translate }}</option>
+                </select>
+              </div>
+
+              <div class="field" *ngIf="authService.isLoggedIn()">
+                <label>Available Budget (Optional)</label>
+                <input type="number" [(ngModel)]="challenge.budget" name="budget" placeholder="USD">
+              </div>
+
+              <div class="field full">
+                <label>Key Priorities</label>
+                <textarea [(ngModel)]="challenge.priorities" name="priorities" rows="3" placeholder="What are the most important requirements?"></textarea>
+              </div>
+
+              <div class="field full">
+                <label>Expected Outputs</label>
+                <textarea [(ngModel)]="challenge.expected_outputs" name="expectedOutputs" rows="3" placeholder="What results are you looking for?"></textarea>
+              </div>
+
+              <div class="field full" *ngIf="authService.isLoggedIn()">
+                <label class="check-wrap">
+                  <input type="checkbox" [(ngModel)]="challenge.is_public" name="isPublic">
+                  <span class="check-txt">List this challenge publicly in the Virtual Booth</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="form-footer">
+              <div class="error-msg" *ngIf="error">{{ error }}</div>
+              <div class="action-row">
+                <button type="submit" class="btn btn-primary btn-lg" [disabled]="loading">
+                  {{ loading ? 'Posting...' : 'Post Challenge' }}
+                </button>
+                <a routerLink="/challenges" class="btn btn-ghost">Cancel</a>
+              </div>
+            </div>
+          </form>
         </div>
-
-        <form (ngSubmit)="onSubmit()" class="submit-form">
-          <div class="form-group">
-            <label class="form-label">{{ 'CHALLENGES.CHALLENGE_TITLE' | translate }} *</label>
-            <input type="text" class="form-input" [(ngModel)]="challenge.title" name="title" required>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">{{ 'CHALLENGES.DESCRIPTION' | translate }} *</label>
-            <textarea class="form-textarea" [(ngModel)]="challenge.description" name="description" required
-                      style="min-height:150px;"></textarea>
-          </div>
-
-          <div class="grid grid-2">
-            <div class="form-group">
-              <label class="form-label">{{ 'PROJECTS.SECTOR' | translate }}</label>
-              <select class="form-select" [(ngModel)]="challenge.sector" name="sector">
-                <option *ngFor="let s of sectors" [value]="s">{{ 'SECTORS.' + s | translate }}</option>
-              </select>
-            </div>
-            <div class="form-group" *ngIf="authService.isLoggedIn()">
-              <label class="form-label">{{ 'CHALLENGES.BUDGET' | translate }}</label>
-              <input type="number" class="form-input" [(ngModel)]="challenge.budget" name="budget">
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">{{ 'CHALLENGES.PRIORITIES' | translate }}</label>
-            <textarea class="form-textarea" [(ngModel)]="challenge.priorities" name="priorities"></textarea>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">{{ 'CHALLENGES.EXPECTED_OUTPUTS' | translate }}</label>
-            <textarea class="form-textarea" [(ngModel)]="challenge.expected_outputs" name="expectedOutputs"></textarea>
-          </div>
-
-          <!-- Visibility only for logged-in users (guests are always public) -->
-          <div class="form-group" *ngIf="authService.isLoggedIn()">
-            <label class="checkbox-label">
-              <input type="checkbox" [(ngModel)]="challenge.is_public" name="isPublic">
-              {{ 'CHALLENGES.IS_PUBLIC' | translate }}
-            </label>
-          </div>
-
-          <div class="error-msg" *ngIf="error">{{ error }}</div>
-
-          <div class="form-actions-row">
-            <button type="submit" class="btn btn-primary btn-lg" [disabled]="loading">
-              {{ loading ? '...' : ('CHALLENGES.SUBMIT' | translate) }}
-            </button>
-            <a routerLink="/challenges" class="btn btn-outline">Cancel</a>
-          </div>
-        </form>
       </div>
     </div>
   `,
   styles: [`
-    .form-page { max-width: 800px; margin: 0 auto; }
-    .submit-form { margin-top: 2rem; }
+    .submit-page { position: relative; padding: 60px 0 100px; min-height: 100vh; overflow: hidden; }
+    .form-layout { max-width: 860px; margin: 0 auto; }
+    .form-header { text-align: center; margin-bottom: 48px; }
 
-    /* Guest Info Banner */
-    .guest-info-banner {
-      display: flex;
-      align-items: flex-start;
-      gap: 1rem;
-      background: linear-gradient(135deg, rgba(99,102,241,0.08), rgba(168,85,247,0.05));
-      border: 1px solid rgba(99,102,241,0.25);
-      border-radius: 14px;
-      padding: 1.1rem 1.4rem;
-      margin-bottom: 2rem;
+    .form-card { padding: 48px; border-radius: 32px; border: 1px solid var(--c-line-soft); }
+    .glass { background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(20px); }
+    
+    .banner { 
+      margin-bottom: 32px; padding: 24px; border-radius: 20px; border: 1px solid rgba(30,107,255,0.2);
+      display: flex; gap: 20px; align-items: flex-start;
     }
-    .banner-icon { font-size: 1.5rem; flex-shrink: 0; margin-top: 2px; }
-    .banner-text strong {
-      display: block;
-      color: var(--text-primary, #e2e8f0);
-      font-weight: 700;
-      margin-bottom: 0.3rem;
-    }
-    .banner-text p {
-      color: var(--text-secondary, #94a3b8);
-      font-size: 0.88rem;
-      margin: 0;
-      line-height: 1.5;
-    }
-    .banner-text a {
-      color: #818cf8;
-      text-decoration: none;
-      font-weight: 600;
-    }
-    .banner-text a:hover { text-decoration: underline; }
+    .banner .icon { font-size: 24px; }
+    .banner .text strong { display: block; font-size: 14px; font-weight: 700; color: var(--c-ink); margin-bottom: 4px; }
+    .banner .text p { font-size: 13px; color: var(--c-text-mute); margin: 0; line-height: 1.5; }
+    .banner .text a { color: var(--c-blue); font-weight: 600; text-decoration: none; }
 
-    .checkbox-label {
-      display: flex; align-items: center; gap: 0.5rem;
-      color: var(--text-secondary); cursor: pointer;
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    .field.full { grid-column: span 2; }
+    @media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } .field.full { grid-column: span 1; } .form-card { padding: 24px; } }
+
+    .field label { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--c-text-faint); margin-bottom: 8px; }
+    .field input, .field select, .field textarea { 
+      width: 100%; background: rgba(255,255,255,0.8); border: 1px solid var(--c-line-soft); 
+      border-radius: 12px; padding: 12px 16px; font-size: 15px; color: var(--c-text); outline: none; 
+      transition: all 200ms;
     }
-    .checkbox-label input { width: 18px; height: 18px; accent-color: var(--accent-primary); }
-    .error-msg {
-      color: var(--danger); background: rgba(239, 68, 68, 0.1);
-      padding: 0.6rem 1rem; border-radius: var(--radius-sm); margin-bottom: 1rem;
-    }
-    .form-actions-row {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      margin-top: 0.5rem;
-    }
-    .btn-lg { padding: 0.8rem 2rem; font-size: 1rem; }
-  `],
+    .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--c-blue); box-shadow: 0 0 0 3px rgba(30,107,255,0.1); }
+
+    .check-wrap { display: flex; align-items: center; gap: 12px; cursor: pointer; }
+    .check-wrap input { width: 20px; height: 20px; accent-color: var(--c-blue); cursor: pointer; }
+    .check-txt { font-size: 14px; font-weight: 500; color: var(--c-text-mute); }
+
+    .form-footer { margin-top: 40px; border-top: 1px solid var(--c-line-soft); padding-top: 32px; }
+    .action-row { display: flex; align-items: center; gap: 16px; justify-content: center; }
+    .error-msg { font-size: 13px; color: #ef4444; font-weight: 600; text-align: center; margin-bottom: 16px; }
+  `]
 })
 export class ChallengeSubmitComponent {
   challenge: any = {
@@ -152,20 +145,22 @@ export class ChallengeSubmitComponent {
   ) {}
 
   onSubmit(): void {
+    if (!this.challenge.title || !this.challenge.description) {
+      this.error = 'Title and Description are required.';
+      return;
+    }
     this.loading = true;
     this.error = '';
     this.api.createChallenge(this.challenge).subscribe({
       next: () => {
         this.loading = false;
-        // Guests go to /match to see AI results; logged-in users go to challenges
         if (this.authService.isLoggedIn()) {
           this.router.navigate(['/challenges']);
         } else {
           this.router.navigate(['/match']);
         }
       },
-      error: (err) => { this.loading = false; this.error = err.error?.detail || 'Failed to submit'; },
+      error: (err: any) => { this.loading = false; this.error = err.error?.detail || 'Failed to submit'; },
     });
   }
 }
-

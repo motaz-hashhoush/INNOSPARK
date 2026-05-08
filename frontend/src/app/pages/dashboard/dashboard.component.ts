@@ -3,68 +3,89 @@ import { CommonModule } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
 import { ApiService } from '../../core/services/api.service';
 import { Chart, registerables } from 'chart.js';
+import { RevealDirective } from '../../shared/directives/reveal.directive';
 
 Chart.register(...registerables);
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, TranslateModule],
+  imports: [CommonModule, TranslateModule, RevealDirective],
   template: `
-    <div class="page-container">
-      <div class="page-header">
-        <h1 class="page-title">{{ 'DASHBOARD.TITLE' | translate }}</h1>
-      </div>
+    <div class="dashboard-page">
+      <div class="mesh" aria-hidden="true" style="opacity: 0.2;"><span></span></div>
+      <div class="grain"></div>
 
-      <!-- KPI Cards -->
-      <div class="grid grid-4" style="margin-bottom:2rem;" *ngIf="overview">
-        <div class="stat-card fade-in-up">
-          <div class="stat-value">{{ overview.total_projects }}</div>
-          <div class="stat-label">{{ 'DASHBOARD.TOTAL_PROJECTS' | translate }}</div>
-        </div>
-        <div class="stat-card fade-in-up">
-          <div class="stat-value">{{ overview.total_challenges }}</div>
-          <div class="stat-label">{{ 'DASHBOARD.TOTAL_CHALLENGES' | translate }}</div>
-        </div>
-        <div class="stat-card fade-in-up">
-          <div class="stat-value">{{ overview.open_challenges }}</div>
-          <div class="stat-label">{{ 'DASHBOARD.OPEN_CHALLENGES' | translate }}</div>
-        </div>
-        <div class="stat-card fade-in-up">
-          <div class="stat-value">{{ matchStats?.total_matches || 0 }}</div>
-          <div class="stat-label">{{ 'DASHBOARD.TOTAL_MATCHES' | translate }}</div>
-        </div>
-      </div>
+      <div class="container">
+        <header class="dash-header">
+          <div appReveal><span class="kicker">Ecosystem Analytics</span></div>
+          <div appReveal [delay]="80" style="margin-top: 18px;">
+            <h1 class="h-section">Platform <em class="serif-italic" style="color: var(--c-blue);">Insights</em>.</h1>
+            <p class="lead">Monitoring the growth and health of the INNOSPARK innovation pipeline.</p>
+          </div>
+        </header>
 
-      <!-- Charts -->
-      <div class="grid grid-2">
-        <div class="card chart-card">
-          <h3 class="chart-title">{{ 'DASHBOARD.BY_SECTOR' | translate }}</h3>
-          <canvas #sectorChart></canvas>
+        <!-- KPI Grid -->
+        <div class="kpi-grid" *ngIf="overview">
+          <div class="kpi-card glass" appReveal [delay]="120">
+            <div class="kpi-val">{{ overview.total_projects }}</div>
+            <div class="kpi-lbl">Total Innovations</div>
+          </div>
+          <div class="kpi-card glass" appReveal [delay]="180">
+            <div class="kpi-val">{{ overview.total_challenges }}</div>
+            <div class="kpi-lbl">Industry Challenges</div>
+          </div>
+          <div class="kpi-card glass" appReveal [delay]="240">
+            <div class="kpi-val">{{ overview.open_challenges }}</div>
+            <div class="kpi-lbl">Active Calls</div>
+          </div>
+          <div class="kpi-card glass" appReveal [delay]="300">
+            <div class="kpi-val">{{ matchStats?.total_matches || 0 }}</div>
+            <div class="kpi-lbl">AI Matches</div>
+          </div>
         </div>
-        <div class="card chart-card">
-          <h3 class="chart-title">{{ 'DASHBOARD.BY_READINESS' | translate }}</h3>
-          <canvas #readinessChart></canvas>
-        </div>
-        <div class="card chart-card">
-          <h3 class="chart-title">{{ 'DASHBOARD.BY_STATUS' | translate }}</h3>
-          <canvas #statusChart></canvas>
-        </div>
-        <div class="card chart-card">
-          <h3 class="chart-title">{{ 'DASHBOARD.MATCH_STATS' | translate }}</h3>
-          <canvas #matchChart></canvas>
+
+        <!-- Charts Grid -->
+        <div class="charts-grid" appReveal [delay]="360">
+          <div class="chart-box glass">
+            <h3 class="h-card">Sectors Distribution</h3>
+            <div class="canvas-wrap"><canvas #sectorChart></canvas></div>
+          </div>
+          <div class="chart-box glass">
+            <h3 class="h-card">Readiness Levels</h3>
+            <div class="canvas-wrap"><canvas #readinessChart></canvas></div>
+          </div>
+          <div class="chart-box glass">
+            <h3 class="h-card">Innovation Pipeline</h3>
+            <div class="canvas-wrap"><canvas #statusChart></canvas></div>
+          </div>
+          <div class="chart-box glass">
+            <h3 class="h-card">Matching Success</h3>
+            <div class="canvas-wrap"><canvas #matchChart></canvas></div>
+          </div>
         </div>
       </div>
     </div>
   `,
   styles: [`
-    .chart-card { padding: 1.5rem; }
-    .chart-title {
-      font-size: 1rem; font-weight: 700; color: var(--accent-tertiary);
-      margin-bottom: 1rem;
-    }
-    canvas { max-height: 300px; }
-  `],
+    .dashboard-page { position: relative; padding: 60px 0 100px; min-height: 100vh; overflow: hidden; }
+    .dash-header { margin-bottom: 48px; }
+
+    .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-bottom: 40px; }
+    @media (max-width: 900px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 500px) { .kpi-grid { grid-template-columns: 1fr; } }
+
+    .kpi-card { padding: 32px; border-radius: 24px; border: 1px solid var(--c-line-soft); text-align: center; }
+    .kpi-val { font-family: var(--serif); font-size: 32px; font-weight: 800; color: var(--c-blue); line-height: 1; margin-bottom: 8px; }
+    .kpi-lbl { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--c-text-faint); }
+    
+    .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    @media (max-width: 800px) { .charts-grid { grid-template-columns: 1fr; } }
+
+    .chart-box { padding: 32px; border-radius: 32px; border: 1px solid var(--c-line-soft); }
+    .canvas-wrap { margin-top: 24px; height: 300px; position: relative; }
+    .glass { background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(20px); }
+  `]
 })
 export class DashboardComponent implements OnInit, AfterViewInit {
   @ViewChild('sectorChart') sectorChartRef!: ElementRef<HTMLCanvasElement>;
@@ -95,61 +116,62 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   private tryBuildCharts(): void {
     if (!this.chartsReady || !this.overview) return;
 
-    const colors = ['#6366f1', '#8b5cf6', '#c084fc', '#f0abfc', '#818cf8', '#a78bfa', '#34d399', '#fbbf24'];
+    const accentBlue = '#1e6bff';
+    const accentSoft = '#e2e8f0';
+    const chartColors = ['#1e6bff', '#3b82f6', '#60a5fa', '#93c5fd', '#bfdbfe'];
 
-    // Sector chart
+    Chart.defaults.color = '#64748b';
+    Chart.defaults.font.family = 'Inter, sans-serif';
+
     if (this.sectorChartRef) {
       new Chart(this.sectorChartRef.nativeElement, {
         type: 'doughnut',
         data: {
           labels: Object.keys(this.overview.projects_by_sector || {}),
-          datasets: [{ data: Object.values(this.overview.projects_by_sector || {}), backgroundColor: colors }],
+          datasets: [{ data: Object.values(this.overview.projects_by_sector || {}), backgroundColor: chartColors, borderWidth: 0, hoverOffset: 10 }],
         },
-        options: { responsive: true, plugins: { legend: { labels: { color: '#94a3b8' } } } },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, padding: 20 } } } },
       });
     }
 
-    // Readiness chart
     if (this.readinessChartRef) {
       new Chart(this.readinessChartRef.nativeElement, {
         type: 'bar',
         data: {
-          labels: Object.keys(this.overview.projects_by_readiness || {}),
-          datasets: [{ label: 'Virtual Booths', data: Object.values(this.overview.projects_by_readiness || {}), backgroundColor: '#8b5cf6' }],
+          labels: Object.keys(this.overview.projects_by_readiness || {}).map(l => l.replace('_', ' ')),
+          datasets: [{ label: 'Innovations', data: Object.values(this.overview.projects_by_readiness || {}), backgroundColor: accentBlue, borderRadius: 8 }],
         },
         options: {
-          responsive: true,
-          scales: { x: { ticks: { color: '#94a3b8' } }, y: { ticks: { color: '#94a3b8' }, beginAtZero: true } },
-          plugins: { legend: { display: false } },
+          responsive: true, maintainAspectRatio: false,
+          scales: { y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.03)' } }, x: { grid: { display: false } } },
+          plugins: { legend: { display: false } }
         },
       });
     }
 
-    // Status chart
     if (this.statusChartRef) {
       new Chart(this.statusChartRef.nativeElement, {
         type: 'bar',
         data: {
           labels: Object.keys(this.overview.projects_by_status || {}),
-          datasets: [{ label: 'Virtual Booths', data: Object.values(this.overview.projects_by_status || {}), backgroundColor: colors.slice(0, 5) }],
+          datasets: [{ label: 'Stage Count', data: Object.values(this.overview.projects_by_status || {}), backgroundColor: '#3b82f6', borderRadius: 8 }],
         },
         options: {
-          responsive: true, indexAxis: 'y',
-          scales: { x: { ticks: { color: '#94a3b8' }, beginAtZero: true }, y: { ticks: { color: '#94a3b8' } } },
-          plugins: { legend: { display: false } },
+          responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+          scales: { x: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.03)' } }, y: { grid: { display: false } } },
+          plugins: { legend: { display: false } }
         },
       });
     }
 
-    // Match stats chart
     if (this.matchChartRef && this.matchStats) {
       new Chart(this.matchChartRef.nativeElement, {
         type: 'pie',
         data: {
           labels: Object.keys(this.matchStats.matches_by_status || {}),
-          datasets: [{ data: Object.values(this.matchStats.matches_by_status || {}), backgroundColor: ['#fbbf24', '#34d399', '#f87171'] }],
+          datasets: [{ data: Object.values(this.matchStats.matches_by_status || {}), backgroundColor: ['#fbbf24', '#34d399', '#f87171'], borderWidth: 0 }],
         },
-        options: { responsive: true, plugins: { legend: { labels: { color: '#94a3b8' } } } },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } },
       });
     }
   }

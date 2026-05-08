@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { ApiService } from '../../core/services/api.service';
+import { RevealDirective } from '../../shared/directives/reveal.directive';
 
 const SECTORS = [
   { value: 'health', label: 'Health' },
@@ -30,564 +31,159 @@ function getOrCreateSessionToken(): string {
 @Component({
   selector: 'app-guest-matcher',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, RevealDirective],
   template: `
-    <div class="guest-page">
+    <div class="matcher-page">
+      <div class="mesh" aria-hidden="true" style="opacity: 0.35;"><span></span></div>
+      <div class="grain"></div>
 
-      <!-- Hero Section -->
-      <div class="hero-section">
-        <div class="hero-badge">🚀 No Account Required</div>
-        <h1 class="hero-title">Find Matching Innovation Projects</h1>
-        <p class="hero-sub">Describe your industry challenge and our AI will instantly match you with relevant university graduation projects.</p>
-        <div class="hero-steps">
-          <div class="step"><span class="step-num">1</span><span>Describe your challenge</span></div>
-          <div class="step-arrow">→</div>
-          <div class="step"><span class="step-num">2</span><span>AI analyzes & matches</span></div>
-          <div class="step-arrow">→</div>
-          <div class="step"><span class="step-num">3</span><span>Explore matching projects</span></div>
-        </div>
-      </div>
-
-      <div class="main-layout">
-
-        <!-- Form Panel -->
-        <div class="form-panel card" [class.collapsed]="hasResults && !showForm">
-          <div class="panel-header" (click)="hasResults && toggleForm()">
-            <h2 class="panel-title">
-              <span class="panel-icon">🎯</span>
-              {{ hasResults ? (showForm ? 'Edit Your Challenge' : 'Your Challenge') : 'Describe Your Challenge' }}
-            </h2>
-            <button class="toggle-btn" *ngIf="hasResults">
-              {{ showForm ? '▲ Collapse' : '▼ Edit' }}
-            </button>
+      <div class="container">
+        <!-- Hero Section -->
+        <div class="matcher-hero">
+          <div appReveal><span class="kicker">AI matchmaking</span></div>
+          <div appReveal [delay]="80">
+            <h1 class="h-section">Every challenge,<br>meets <em class="serif-italic" style="color: var(--c-blue);">its team</em>.</h1>
           </div>
-
-          <div class="form-body" [class.hidden]="hasResults && !showForm">
-            <div class="form-group">
-              <label class="form-label">Challenge Title <span class="required">*</span></label>
-              <input
-                type="text"
-                class="form-input"
-                [(ngModel)]="form.title"
-                placeholder="e.g. Smart Water Leak Detection System"
-                id="guest-title"
-              />
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">Sector <span class="required">*</span></label>
-              <select class="form-select" [(ngModel)]="form.sector" id="guest-sector">
-                <option value="">Select a sector...</option>
-                <option *ngFor="let s of sectors" [value]="s.value">{{ s.label }}</option>
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">Problem Description <span class="required">*</span></label>
-              <textarea
-                class="form-textarea"
-                [(ngModel)]="form.description"
-                rows="5"
-                placeholder="Describe the problem you are trying to solve in detail. What are the pain points? What solutions have failed?"
-                id="guest-description"
-              ></textarea>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">Key Priorities <span class="optional">(optional)</span></label>
-              <textarea
-                class="form-textarea"
-                [(ngModel)]="form.priorities"
-                rows="3"
-                placeholder="What are the most important requirements? e.g. Real-time alerts, low cost, mobile-friendly"
-                id="guest-priorities"
-              ></textarea>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">Expected Outputs <span class="optional">(optional)</span></label>
-              <textarea
-                class="form-textarea"
-                [(ngModel)]="form.expected_outputs"
-                rows="3"
-                placeholder="What deliverables or outcomes are you expecting? e.g. A working prototype, mobile app, data pipeline"
-                id="guest-expected"
-              ></textarea>
-            </div>
-
-            <div class="form-actions">
-              <button
-                class="btn btn-primary btn-lg"
-                [disabled]="loading || !isFormValid()"
-                (click)="submit()"
-                id="guest-submit"
-              >
-                <span *ngIf="!loading">⚡ Find Matching Projects</span>
-                <span *ngIf="loading" class="loading-text">
-                  <span class="spinner"></span> AI is analyzing…
-                </span>
-              </button>
-              <p class="form-note">
-                <span class="lock-icon">🔒</span>
-                Your session is private and stored only in your browser.
-                <a routerLink="/auth/register">Create an account</a> to save challenges permanently.
-              </p>
-            </div>
-
-            <div class="error-banner" *ngIf="error">
-              <span>⚠️</span> {{ error }}
-            </div>
+          <div appReveal [delay]="140">
+            <p class="lead" style="max-width: 60ch; margin: 20px auto 0;">
+              Describe your industry challenge and our AI will instantly match you with 
+              relevant graduation projects from An-Najah's brightest innovators.
+            </p>
           </div>
         </div>
 
-        <!-- Results Panel -->
-        <div class="results-panel" *ngIf="hasResults">
-
-          <div class="results-header">
-            <div class="results-meta">
-              <h2 class="results-title">
-                <span class="ai-icon">🤖</span>
-                AI Match Results
+        <div class="matcher-layout">
+          <!-- Form Panel -->
+          <div class="matcher-form card glass" appReveal [delay]="200" [class.collapsed]="hasResults && !showForm">
+            <div class="form-head" (click)="hasResults && toggleForm()">
+              <h2 class="h-card">
+                {{ hasResults ? (showForm ? 'Edit Your Challenge' : 'Your Challenge') : 'Describe Your Challenge' }}
               </h2>
-              <div class="results-stats">
-                <span class="stat-pill">{{ matches.length }} projects matched</span>
-                <span class="stat-pill secondary">for: <strong>{{ challengeTitle }}</strong></span>
-              </div>
+              <button class="btn btn-ghost btn-sm" *ngIf="hasResults">
+                {{ showForm ? 'Collapse' : 'Edit Challenge' }}
+              </button>
             </div>
-            <button class="btn btn-outline btn-sm" (click)="resetSession()" id="guest-reset">
-              🔄 New Challenge
-            </button>
-          </div>
 
-          <div class="no-matches" *ngIf="matches.length === 0">
-            <div class="no-match-icon">🔍</div>
-            <p>No matching projects found yet. Try broadening your description or checking back as more projects are added.</p>
-          </div>
-
-          <div class="match-list">
-            <a
-              [routerLink]="['/projects', m.project_id]"
-              class="match-card"
-              *ngFor="let m of matches; let i = index"
-              [style.animation-delay]="i * 0.05 + 's'"
-            >
-              <div class="match-rank">#{{ i + 1 }}</div>
-              <div class="match-body">
-                <h3 class="match-title">{{ m.project_title }}</h3>
-                <span class="match-sector">{{ m.project_sector | titlecase }}</span>
-              </div>
-              <div class="match-score-wrap">
-                <div class="score-ring" [style.--pct]="m.similarity_score">
-                  <svg viewBox="0 0 36 36" class="score-svg">
-                    <path class="score-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
-                    <path class="score-fill"
-                          [attr.stroke-dasharray]="(m.similarity_score * 100).toFixed(1) + ', 100'"
-                          d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
-                  </svg>
-                  <span class="score-label">{{ (m.similarity_score * 100).toFixed(0) }}%</span>
+            <div class="form-body" *ngIf="!hasResults || showForm">
+              <div class="form-grid">
+                <div class="field">
+                  <label>Challenge Title *</label>
+                  <input type="text" [(ngModel)]="form.title" placeholder="e.g. Smart Water Leak Detection">
                 </div>
-                <span class="score-text" [ngClass]="getScoreClass(m.similarity_score)">
-                  {{ getScoreLabel(m.similarity_score) }}
-                </span>
+                <div class="field">
+                  <label>Sector *</label>
+                  <select [(ngModel)]="form.sector">
+                    <option value="">Select a sector...</option>
+                    <option *ngFor="let s of sectors" [value]="s.value">{{ s.label }}</option>
+                  </select>
+                </div>
               </div>
-              <div class="match-arrow">→</div>
-            </a>
-          </div>
+              
+              <div class="field" style="margin-top: 20px;">
+                <label>Problem Description *</label>
+                <textarea [(ngModel)]="form.description" rows="4" placeholder="Describe the problem you are trying to solve..."></textarea>
+              </div>
 
-          <div class="cta-banner">
-            <div class="cta-content">
-              <span class="cta-icon">✨</span>
-              <div>
-                <strong>Want to save this & do more?</strong>
-                <p>Create a free account to manage challenges, get notified of new matches, and collaborate with project teams.</p>
+              <div class="form-actions" style="margin-top: 32px;">
+                <button class="btn btn-primary btn-lg" [disabled]="loading || !isFormValid()" (click)="submit()">
+                  <span *ngIf="!loading">⚡ Find Matching Projects</span>
+                  <span *ngIf="loading">Analyzing...</span>
+                </button>
+                <p class="note">Your session is private. <a routerLink="/auth/register">Sign up</a> to save results.</p>
               </div>
             </div>
-            <div class="cta-actions">
-              <a routerLink="/auth/register" class="btn btn-primary">Create Free Account</a>
-              <a routerLink="/projects" class="btn btn-outline">Browse All Projects</a>
-            </div>
           </div>
 
+          <!-- Results Panel -->
+          <div class="matcher-results" *ngIf="hasResults" appReveal [delay]="100">
+            <div class="results-head">
+              <h2 class="h-card">AI Match Results</h2>
+              <div class="meta-pills">
+                <span class="pill">{{ matches.length }} Matches</span>
+                <button class="btn btn-ghost btn-sm" (click)="resetSession()">New Search</button>
+              </div>
+            </div>
+
+            <div class="match-grid">
+              <article *ngFor="let m of matches; let i = index" class="match-item glass" [style.animation-delay]="i * 0.1 + 's'">
+                <div class="match-score">
+                  <div class="pct">{{ (m.similarity_score * 100).toFixed(0) }}%</div>
+                  <div class="lbl">Match</div>
+                </div>
+                <div class="match-content">
+                  <span class="sector">{{ m.project_sector | titlecase }}</span>
+                  <h3 class="title">{{ m.project_title }}</h3>
+                  <div class="actions">
+                    <a [routerLink]="['/projects', m.project_id]" class="btn btn-primary btn-sm">Details</a>
+                  </div>
+                </div>
+              </article>
+            </div>
+
+            <div class="results-cta glass" style="margin-top: 40px; text-align: center; padding: 40px;">
+              <h3 class="h-card">Found what you were looking for?</h3>
+              <p style="margin: 12px 0 24px; color: var(--c-text-mute);">Register now to contact these teams and start a collaboration.</p>
+              <div style="display: flex; gap: 12px; justify-content: center;">
+                <a routerLink="/auth/register" class="btn btn-primary">Create Account</a>
+                <a routerLink="/projects" class="btn btn-outline">Browse All</a>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   `,
   styles: [`
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+    .matcher-page { position: relative; padding: 60px 0 100px; min-height: 100vh; overflow: hidden; }
+    .matcher-hero { text-align: center; margin-bottom: 64px; }
+    
+    .matcher-layout { max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 32px; }
 
-    .guest-page {
-      min-height: 100vh;
-      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
-      font-family: 'Inter', sans-serif;
-      padding-bottom: 4rem;
-    }
+    .matcher-form { border-radius: 32px; border: 1px solid var(--c-line-soft); overflow: hidden; }
+    .matcher-form.collapsed { border-color: rgba(30,107,255,0.2); }
+    .form-head { padding: 32px 40px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+    .form-body { padding: 0 40px 40px; }
+    
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    @media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } .form-head, .form-body { padding: 24px; } }
 
-    /* ── Hero ── */
-    .hero-section {
-      text-align: center;
-      padding: 4rem 2rem 3rem;
+    .field label { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--c-text-faint); margin-bottom: 8px; }
+    .field input, .field select, .field textarea { 
+      width: 100%; background: rgba(255,255,255,0.8); border: 1px solid var(--c-line-soft); 
+      border-radius: 12px; padding: 12px 16px; font-size: 15px; color: var(--c-text); outline: none; 
+      transition: all 200ms;
     }
-    .hero-badge {
-      display: inline-block;
-      background: linear-gradient(135deg, rgba(99,102,241,0.3), rgba(168,85,247,0.3));
-      border: 1px solid rgba(168,85,247,0.4);
-      color: #c4b5fd;
-      padding: 0.4rem 1.2rem;
-      border-radius: 50px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      letter-spacing: 0.5px;
-      margin-bottom: 1.5rem;
-    }
-    .hero-title {
-      font-size: clamp(2rem, 5vw, 3.2rem);
-      font-weight: 800;
-      background: linear-gradient(135deg, #e2e8f0, #a78bfa, #60a5fa);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      margin-bottom: 1rem;
-      line-height: 1.15;
-    }
-    .hero-sub {
-      color: #94a3b8;
-      font-size: 1.1rem;
-      max-width: 600px;
-      margin: 0 auto 2.5rem;
-      line-height: 1.6;
-    }
-    .hero-steps {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.75rem;
-      flex-wrap: wrap;
-    }
-    .step {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      color: #cbd5e1;
-      font-size: 0.9rem;
-      font-weight: 500;
-    }
-    .step-num {
-      width: 28px; height: 28px;
-      background: linear-gradient(135deg, #6366f1, #8b5cf6);
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 0.8rem; font-weight: 800; color: white;
-      flex-shrink: 0;
-    }
-    .step-arrow { color: #475569; font-size: 1.2rem; }
+    .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--c-blue); box-shadow: 0 0 0 3px rgba(30,107,255,0.1); }
 
-    /* ── Layout ── */
-    .main-layout {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 1.5rem;
-      display: flex;
-      flex-direction: column;
-      gap: 2rem;
-    }
+    .form-actions { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+    .note { font-size: 12px; color: var(--c-text-faint); }
+    .note a { color: var(--c-blue); font-weight: 600; text-decoration: none; }
 
-    /* ── Form Panel ── */
-    .form-panel {
-      background: rgba(15, 23, 42, 0.8);
-      border: 1px solid rgba(99,102,241,0.2);
-      border-radius: 20px;
-      padding: 0;
-      overflow: hidden;
-      backdrop-filter: blur(20px);
-      transition: all 0.3s ease;
-    }
-    .panel-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 1.5rem 2rem;
-      cursor: default;
-      border-bottom: 1px solid rgba(99,102,241,0.15);
-    }
-    .form-panel.collapsed .panel-header { cursor: pointer; border-bottom: none; }
-    .panel-title {
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-      font-size: 1.2rem;
-      font-weight: 700;
-      color: #e2e8f0;
-      margin: 0;
-    }
-    .panel-icon { font-size: 1.3rem; }
-    .toggle-btn {
-      background: rgba(99,102,241,0.1);
-      border: 1px solid rgba(99,102,241,0.3);
-      color: #a78bfa;
-      padding: 0.35rem 0.85rem;
-      border-radius: 8px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .toggle-btn:hover { background: rgba(99,102,241,0.2); }
-    .form-body { padding: 2rem; }
-    .form-body.hidden { display: none; }
+    .matcher-results { margin-top: 16px; }
+    .results-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+    .meta-pills { display: flex; gap: 12px; align-items: center; }
+    .pill { font-size: 12px; font-weight: 700; background: rgba(30,107,255,0.1); color: var(--c-blue); padding: 4px 12px; border-radius: 99px; }
 
-    .form-group { margin-bottom: 1.5rem; }
-    .form-label {
-      display: block;
-      font-size: 0.9rem;
-      font-weight: 600;
-      color: #cbd5e1;
-      margin-bottom: 0.5rem;
+    .match-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
+    .match-item { 
+      display: flex; align-items: center; gap: 32px; padding: 24px 32px; border-radius: 24px; 
+      border: 1px solid var(--c-line-soft); transition: all 300ms;
+      animation: slideUp 0.6s ease both;
     }
-    .required { color: #f87171; margin-left: 2px; }
-    .optional { color: #64748b; font-weight: 400; font-size: 0.8rem; }
+    .match-item:hover { transform: translateX(8px); border-color: var(--c-blue); box-shadow: 0 20px 40px -20px rgba(30,107,255,0.2); }
+    
+    @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-    .form-input, .form-select, .form-textarea {
-      width: 100%;
-      background: rgba(30, 41, 59, 0.8);
-      border: 1px solid rgba(99,102,241,0.2);
-      border-radius: 12px;
-      color: #e2e8f0;
-      font-family: 'Inter', sans-serif;
-      font-size: 0.95rem;
-      padding: 0.75rem 1rem;
-      transition: border-color 0.2s, box-shadow 0.2s;
-      box-sizing: border-box;
-    }
-    .form-input:focus, .form-select:focus, .form-textarea:focus {
-      outline: none;
-      border-color: #6366f1;
-      box-shadow: 0 0 0 3px rgba(99,102,241,0.15);
-    }
-    .form-input::placeholder, .form-textarea::placeholder { color: #475569; }
-    .form-select option { background: #1e293b; }
-    .form-textarea { resize: vertical; min-height: 100px; }
+    .match-score { text-align: center; min-width: 60px; }
+    .match-score .pct { font-family: var(--serif); font-size: 24px; font-weight: 800; color: var(--c-blue); line-height: 1; }
+    .match-score .lbl { font-size: 9px; text-transform: uppercase; font-weight: 700; color: var(--c-text-faint); margin-top: 4px; }
 
-    .form-actions { margin-top: 2rem; }
-    .btn-lg { padding: 0.9rem 2rem; font-size: 1rem; border-radius: 14px; width: 100%; justify-content: center; }
-    .btn {
-      display: inline-flex; align-items: center; gap: 0.5rem;
-      padding: 0.6rem 1.4rem; border-radius: 10px;
-      font-weight: 600; font-size: 0.9rem;
-      text-decoration: none; cursor: pointer;
-      transition: all 0.2s; border: none;
-    }
-    .btn-primary {
-      background: linear-gradient(135deg, #6366f1, #8b5cf6);
-      color: white;
-    }
-    .btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(99,102,241,0.4); }
-    .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
-    .btn-outline {
-      background: transparent;
-      border: 1px solid rgba(99,102,241,0.4);
-      color: #a78bfa;
-    }
-    .btn-outline:hover { background: rgba(99,102,241,0.1); }
-    .btn-sm { padding: 0.4rem 1rem; font-size: 0.85rem; }
+    .match-content { flex: 1; }
+    .match-content .sector { font-size: 10px; font-weight: 700; color: var(--c-blue); text-transform: uppercase; }
+    .match-content .title { font-size: 17px; font-weight: 700; color: var(--c-ink); margin: 4px 0 0; }
 
-    .loading-text { display: flex; align-items: center; gap: 0.6rem; justify-content: center; }
-    .spinner {
-      width: 18px; height: 18px;
-      border: 2px solid rgba(255,255,255,0.3);
-      border-top-color: white;
-      border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    .form-note {
-      margin-top: 1rem;
-      color: #64748b;
-      font-size: 0.82rem;
-      text-align: center;
-      line-height: 1.5;
-    }
-    .form-note a { color: #818cf8; }
-    .lock-icon { margin-right: 0.3rem; }
-
-    .error-banner {
-      margin-top: 1rem;
-      background: rgba(239,68,68,0.1);
-      border: 1px solid rgba(239,68,68,0.3);
-      color: #fca5a5;
-      padding: 0.75rem 1rem;
-      border-radius: 10px;
-      font-size: 0.88rem;
-    }
-
-    /* ── Results ── */
-    .results-panel { display: flex; flex-direction: column; gap: 1.5rem; }
-
-    .results-header {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 1rem;
-    }
-    .results-title {
-      font-size: 1.4rem;
-      font-weight: 800;
-      color: #e2e8f0;
-      margin: 0 0 0.5rem;
-      display: flex; align-items: center; gap: 0.5rem;
-    }
-    .ai-icon { font-size: 1.5rem; }
-    .results-stats { display: flex; gap: 0.5rem; flex-wrap: wrap; }
-    .stat-pill {
-      background: rgba(99,102,241,0.15);
-      border: 1px solid rgba(99,102,241,0.3);
-      color: #a78bfa;
-      padding: 0.25rem 0.75rem;
-      border-radius: 20px;
-      font-size: 0.8rem;
-      font-weight: 600;
-    }
-    .stat-pill.secondary { background: rgba(30,41,59,0.5); color: #94a3b8; border-color: rgba(148,163,184,0.2); }
-
-    .no-matches {
-      background: rgba(15,23,42,0.6);
-      border: 1px solid rgba(99,102,241,0.15);
-      border-radius: 16px;
-      padding: 3rem;
-      text-align: center;
-      color: #64748b;
-    }
-    .no-match-icon { font-size: 3rem; margin-bottom: 1rem; }
-
-    /* ── Match Cards ── */
-    .match-list { display: flex; flex-direction: column; gap: 0.75rem; }
-
-    .match-card {
-      display: flex;
-      align-items: center;
-      gap: 1.25rem;
-      background: rgba(15,23,42,0.7);
-      border: 1px solid rgba(99,102,241,0.15);
-      border-radius: 16px;
-      padding: 1.25rem 1.5rem;
-      text-decoration: none;
-      transition: all 0.25s ease;
-      animation: slideIn 0.4s ease both;
-      cursor: pointer;
-    }
-    @keyframes slideIn {
-      from { opacity: 0; transform: translateY(12px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    .match-card:hover {
-      border-color: rgba(99,102,241,0.5);
-      background: rgba(30,27,75,0.8);
-      transform: translateX(4px);
-      box-shadow: 0 4px 20px rgba(99,102,241,0.15);
-    }
-
-    .match-rank {
-      font-size: 0.75rem;
-      font-weight: 800;
-      color: #475569;
-      width: 28px;
-      text-align: center;
-      flex-shrink: 0;
-    }
-    .match-body { flex: 1; min-width: 0; }
-    .match-title {
-      font-size: 1rem;
-      font-weight: 700;
-      color: #e2e8f0;
-      margin: 0 0 0.3rem;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .match-sector {
-      font-size: 0.78rem;
-      font-weight: 600;
-      color: #6366f1;
-      background: rgba(99,102,241,0.1);
-      padding: 0.15rem 0.6rem;
-      border-radius: 20px;
-    }
-
-    /* Score Ring */
-    .match-score-wrap {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0.3rem;
-      flex-shrink: 0;
-    }
-    .score-ring {
-      position: relative;
-      width: 52px; height: 52px;
-    }
-    .score-svg { transform: rotate(-90deg); width: 100%; height: 100%; }
-    .score-bg {
-      fill: none;
-      stroke: rgba(99,102,241,0.1);
-      stroke-width: 3.5;
-    }
-    .score-fill {
-      fill: none;
-      stroke: url(#scoreGrad);
-      stroke-width: 3.5;
-      stroke-linecap: round;
-      stroke: #6366f1;
-      transition: stroke-dasharray 0.5s ease;
-    }
-    .score-label {
-      position: absolute;
-      top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 0.7rem;
-      font-weight: 800;
-      color: #e2e8f0;
-    }
-    .score-text {
-      font-size: 0.7rem;
-      font-weight: 700;
-      letter-spacing: 0.3px;
-    }
-    .score-high { color: #34d399; }
-    .score-mid  { color: #fbbf24; }
-    .score-low  { color: #94a3b8; }
-
-    .match-arrow { color: #475569; font-size: 1.1rem; flex-shrink: 0; }
-
-    /* ── CTA ── */
-    .cta-banner {
-      background: linear-gradient(135deg, rgba(99,102,241,0.12), rgba(168,85,247,0.12));
-      border: 1px solid rgba(99,102,241,0.25);
-      border-radius: 20px;
-      padding: 1.75rem 2rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1.5rem;
-      flex-wrap: wrap;
-    }
-    .cta-content {
-      display: flex;
-      align-items: flex-start;
-      gap: 1rem;
-    }
-    .cta-icon { font-size: 2rem; flex-shrink: 0; }
-    .cta-content strong { color: #e2e8f0; font-size: 1rem; }
-    .cta-content p { color: #94a3b8; font-size: 0.88rem; margin: 0.25rem 0 0; line-height: 1.5; }
-    .cta-actions { display: flex; gap: 0.75rem; flex-wrap: wrap; flex-shrink: 0; }
-
-    @media (max-width: 640px) {
-      .hero-section { padding: 2.5rem 1rem 2rem; }
-      .form-body { padding: 1.25rem; }
-      .match-card { padding: 1rem; gap: 0.75rem; }
-      .cta-banner { flex-direction: column; }
-      .hero-steps { display: none; }
-    }
-  `],
+    .glass { background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(20px); }
+  `]
 })
 export class GuestMatcherComponent implements OnInit {
   sectors = SECTORS;
@@ -612,8 +208,6 @@ export class GuestMatcherComponent implements OnInit {
 
   ngOnInit(): void {
     this.sessionToken = getOrCreateSessionToken();
-    
-    // Try to load existing results from local storage
     const savedData = localStorage.getItem(SESSION_DATA_KEY);
     if (savedData) {
       try {
@@ -622,9 +216,7 @@ export class GuestMatcherComponent implements OnInit {
           this.applyResults(res);
           this.showForm = false;
         }
-      } catch (e) {
-        // ignore parsing errors
-      }
+      } catch (e) {}
     }
   }
 
@@ -641,17 +233,15 @@ export class GuestMatcherComponent implements OnInit {
       ...this.form,
       session_token: this.sessionToken,
     }).subscribe({
-      next: (res: { challenge: any; matches: any[]; total: number }) => {
-        // Save to local storage since backend doesn't persist it
+      next: (res: any) => {
         localStorage.setItem(SESSION_DATA_KEY, JSON.stringify(res));
         this.applyResults(res);
         this.showForm = false;
         this.loading = false;
-        // Scroll to results
-        setTimeout(() => document.querySelector('.results-panel')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+        setTimeout(() => document.querySelector('.matcher-results')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
       },
       error: (err: any) => {
-        this.error = err?.error?.detail || 'Something went wrong. Please try again.';
+        this.error = err?.error?.detail || 'Something went wrong.';
         this.loading = false;
       },
     });
@@ -664,8 +254,6 @@ export class GuestMatcherComponent implements OnInit {
       this.form.title = res.challenge.title;
       this.form.description = res.challenge.description;
       this.form.sector = res.challenge.sector;
-      this.form.priorities = res.challenge.priorities || '';
-      this.form.expected_outputs = res.challenge.expected_outputs || '';
     }
     this.hasResults = true;
   }
@@ -681,20 +269,6 @@ export class GuestMatcherComponent implements OnInit {
     this.hasResults = false;
     this.showForm = true;
     this.matches = [];
-    this.challengeTitle = '';
     this.form = { title: '', description: '', sector: '', priorities: '', expected_outputs: '' };
-    this.error = '';
-  }
-
-  getScoreClass(score: number): string {
-    if (score >= 0.65) return 'score-high';
-    if (score >= 0.4) return 'score-mid';
-    return 'score-low';
-  }
-
-  getScoreLabel(score: number): string {
-    if (score >= 0.65) return 'Strong';
-    if (score >= 0.4) return 'Good';
-    return 'Partial';
   }
 }
