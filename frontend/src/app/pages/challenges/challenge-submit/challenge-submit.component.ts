@@ -81,7 +81,7 @@ import { RevealDirective } from '../../../shared/directives/reveal.directive';
               <div class="error-msg" *ngIf="error">{{ error }}</div>
               <div class="action-row">
                 <button type="submit" class="btn btn-primary btn-lg" [disabled]="loading">
-                  {{ loading ? 'Posting...' : 'Post Challenge' }}
+                  {{ loading ? 'Matching...' : 'Find Matches' }}
                 </button>
                 <a routerLink="/challenges" class="btn btn-ghost">Cancel</a>
               </div>

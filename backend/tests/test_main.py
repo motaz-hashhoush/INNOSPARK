@@ -4,7 +4,7 @@ def test_read_main(client: TestClient):
     response = client.get("/")
     assert response.status_code == 200
     assert response.json() == {
-        "name": "INNOSPARK API",
+        "name": "innoPark API",
         "version": "1.0.0",
         "status": "running",
         "docs": "/docs",

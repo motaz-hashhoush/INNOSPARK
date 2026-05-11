@@ -52,8 +52,12 @@ def guest_match(
     Submit a challenge description as a guest and receive AI match results
     immediately. Does NOT save to the database.
     """
-    # 1. Build text for embedding
-    parts = [data.title, data.description]
+    # 1. Build text for embedding (description and sector are optional)
+    parts = [data.title]
+    if data.description:
+        parts.append(data.description)
+    if data.sector:
+        parts.append(data.sector)
     if data.priorities:
         parts.append(data.priorities)
     if data.expected_outputs:
@@ -100,8 +104,8 @@ def guest_match(
         id=0,  # Mock ID
         company_id=0,
         title=data.title,
-        description=data.description,
-        sector=data.sector,
+        description=data.description or "",
+        sector=data.sector or "other",
         priorities=data.priorities,
         expected_outputs=data.expected_outputs,
         budget=None,

@@ -11,7 +11,7 @@
     "NOTIFICATIONS": "Notifications"
   },
   "HOME": {
-    "HERO_TITLE": "INNOSPARK",
+    "HERO_TITLE": "innoPark",
     "HERO_SUBTITLE": "Transforming Graduation Projects into Market-Ready Solutions",
     "HERO_DESC": "A smart digital platform to showcase university innovations, connect with industry challenges, and enable AI-powered matching.",
     "CTA_PROJECTS": "Explore Virtual Booth",
@@ -25,8 +25,8 @@
   },
   "AUTH": {
     "LOGIN_TITLE": "Welcome Back",
-    "LOGIN_SUBTITLE": "Sign in to your INNOSPARK account",
-    "REGISTER_TITLE": "Join INNOSPARK",
+    "LOGIN_SUBTITLE": "Sign in to your innoPark account",
+    "REGISTER_TITLE": "Join innoPark",
     "REGISTER_SUBTITLE": "Create your account and start innovating",
     "EMAIL": "Email Address",
     "PASSWORD": "Password",
@@ -166,7 +166,7 @@
       "TITLE_1": "From ",
       "TITLE_EM": "showcase",
       "TITLE_2": ", to pipeline.",
-      "LEAD": "Most universities stop at the graduation exhibition. INNOSPARK turns that one moment into a six‑step ignition path — from submission through to market deployment.",
+      "LEAD": "Most universities stop at the graduation exhibition. innoPark turns that one moment into a six‑step ignition path — from submission through to market deployment.",
       "S1_T": "Submission", "S1_D": "Teams publish their graduation project with a structured profile.",
       "S2_T": "Evaluation", "S2_D": "Faculty supervisors and reviewers grade and tag for readiness.",
       "S3_T": "AI Matching", "S3_D": "Projects are paired with industry challenges by skill and intent.",
@@ -244,7 +244,7 @@
       "TITLE_2": "One ",
       "TITLE_EM": "ignition path",
       "TITLE_3": ".",
-      "LEAD": "INNOSPARK is built around four interlocking products — a virtual booth, live industry briefs, an AI matcher, and a structured incubation pipeline.",
+      "LEAD": "innoPark is built around four interlocking products — a virtual booth, live industry briefs, an AI matcher, and a structured incubation pipeline.",
       "P1_CAT": "Showcase", "P1_TITLE": "Virtual Booth",
       "P1_DESC": "240+ graduation projects in a structured, searchable digital exhibition — open year‑round.",
       "P1_L1": "Browse projects", "P1_L2": "Submit yours",
@@ -265,14 +265,14 @@
       "TITLE_3": ".",
       "LEAD": "Updates from An‑Najah Innovation Park — platform milestones, new features, and how the pipeline is bridging university talent with industry demand.",
       "N1_CAT": "Launch", "N1_DATE": "May 8, 2026",
-      "N1_TITLE": "INNOSPARK goes live at An‑Najah Innovation Park",
+      "N1_TITLE": "innoPark goes live at An‑Najah Innovation Park",
       "N1_EXCERPT": "The platform is now open to final‑year students, faculty supervisors, and industry partners — bringing An‑Najah graduation projects into a structured digital showcase for the first time.",
       "N2_CAT": "Feature", "N2_DATE": "May 1, 2026",
       "N2_TITLE": "Try the AI Matcher instantly — no account needed",
       "N2_EXCERPT": "Any company or partner can now submit an industry challenge and receive AI‑ranked project matches in seconds. No registration required — just describe your problem and see the best‑fit teams.",
       "N3_CAT": "Platform", "N3_DATE": "Apr 28, 2026",
       "N3_TITLE": "Six stages from booth to market: inside the pipeline",
-      "N3_EXCERPT": "From structured submission and faculty evaluation to AI matching, incubation, and formal industry partnership — here is how INNOSPARK turns final‑year projects into market‑ready ventures.",
+      "N3_EXCERPT": "From structured submission and faculty evaluation to AI matching, incubation, and formal industry partnership — here is how innoPark turns final‑year projects into market‑ready ventures.",
       "READ": "Read article"
     },
     "CTA": {
@@ -280,7 +280,7 @@
       "TITLE_2": "where ideas ",
       "TITLE_EM": "ignite",
       "TITLE_3": ".",
-      "SUB": "Whether you have a project to launch or a challenge to solve, INNOSPARK is the meeting point.",
+      "SUB": "Whether you have a project to launch or a challenge to solve, innoPark is the meeting point.",
       "BTN_PROJECT": "Submit your project",
       "BTN_CHALLENGE": "Post an industry challenge"
     },
@@ -302,7 +302,7 @@
       "LINK_PROGRAMS": "Programs",
       "LINK_PRESS": "Press",
       "LINK_CONTACT": "Contact",
-      "COPYRIGHT": "© 2026 INNOSPARK · An‑Najah Innovation Park · Nablus, Palestine",
+      "COPYRIGHT": "© 2026 innoPark · An‑Najah Innovation Park · Nablus, Palestine",
       "POWERED": "Powered by An‑Najah National University"
     }
   }

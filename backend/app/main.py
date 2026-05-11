@@ -17,7 +17,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 app = FastAPI(
-    title="INNOSPARK API",
+    title="innoPark API",
     description="Platform for showcasing university graduation projects and AI-powered matching with industry challenges",
     version="1.0.0",
     docs_url="/docs",
@@ -64,7 +64,7 @@ def startup_event():
 @app.get("/", tags=["Health"])
 def root():
     return {
-        "name": "INNOSPARK API",
+        "name": "innoPark API",
         "version": "1.0.0",
         "status": "running",
         "docs": "/docs",

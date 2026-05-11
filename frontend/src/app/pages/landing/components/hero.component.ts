@@ -54,7 +54,7 @@ interface Particle {
         </div>
 
         <div appReveal [delay]="120">
-          <h1 #wordmark class="wordmark">INNOSPARK</h1>
+          <h1 #wordmark class="wordmark">innoPark</h1>
         </div>
 
         <div appReveal [delay]="240">

@@ -17,8 +17,8 @@ class ChallengeCreate(BaseModel):
 
 class GuestChallengeCreate(BaseModel):
     title: str
-    description: str
-    sector: Sector
+    description: Optional[str] = None
+    sector: Optional[Sector] = None
     priorities: Optional[str] = None
     expected_outputs: Optional[str] = None
     session_token: str  # browser-generated UUID

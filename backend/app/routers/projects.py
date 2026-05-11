@@ -84,6 +84,40 @@ def list_projects(
     return ProjectListResponse(projects=projects, total=total)
 
 
+@router.get("/search", response_model=ProjectListResponse)
+def semantic_search_projects(
+    q: str,
+    sector: Optional[str] = None,
+    readiness: Optional[ReadinessLevel] = None,
+    limit: int = 20,
+    db: Session = Depends(get_db),
+):
+    """Semantic search using AI embeddings. Falls back to text search if model unavailable."""
+    if not q or len(q.strip()) < 2:
+        return list_projects(sector=sector, readiness=readiness, limit=limit, db=db)
+
+    try:
+        from app.services.ai_matching import generate_embedding, compute_similarity
+        embedding = generate_embedding(q.strip())
+
+        query = db.query(Project).filter(Project.embedding.isnot(None))
+        if sector:
+            query = query.filter(Project.sector.ilike(f"%{sector}%"))
+        if readiness:
+            query = query.filter(Project.readiness_level == readiness)
+
+        projects = query.all()
+        scored = sorted(
+            [(p, compute_similarity(embedding, p.embedding)) for p in projects],
+            key=lambda x: x[1], reverse=True,
+        )
+        top = [p for p, _ in scored[:limit]]
+        return ProjectListResponse(projects=top, total=len(top))
+
+    except Exception:
+        return list_projects(search=q, sector=sector, readiness=readiness, limit=limit, db=db)
+
+
 @router.get("/{project_id}", response_model=ProjectResponse)
 def get_project(project_id: int, db: Session = Depends(get_db)):
     """Get a single project detail (Virtual Booth view)."""

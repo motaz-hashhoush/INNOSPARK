@@ -83,11 +83,19 @@ export class ApiService {
     return this.http.put<Match>(`${this.baseUrl}/matching/${matchId}/status`, { status });
   }
 
+  // ── Semantic search ──
+  semanticSearchProjects(q: string, sector?: string, readiness?: string, limit = 20): Observable<{ projects: Project[]; total: number }> {
+    let params = new HttpParams().set('q', q).set('limit', limit);
+    if (sector) params = params.set('sector', sector);
+    if (readiness) params = params.set('readiness', readiness);
+    return this.http.get<any>(`${this.baseUrl}/projects/search`, { params });
+  }
+
   // ── Guest Session ──
   guestMatch(data: {
     title: string;
-    description: string;
-    sector: string;
+    description?: string;
+    sector?: string;
     priorities?: string;
     expected_outputs?: string;
     session_token: string;

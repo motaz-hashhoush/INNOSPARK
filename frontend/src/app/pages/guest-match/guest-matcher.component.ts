@@ -20,10 +20,10 @@ const SESSION_KEY = 'innospark_guest_session';
 const SESSION_DATA_KEY = 'innospark_guest_data';
 
 function getOrCreateSessionToken(): string {
-  let token = localStorage.getItem(SESSION_KEY);
+  let token = sessionStorage.getItem(SESSION_KEY);
   if (!token) {
     token = crypto.randomUUID();
-    localStorage.setItem(SESSION_KEY, token);
+    sessionStorage.setItem(SESSION_KEY, token);
   }
   return token;
 }
@@ -71,17 +71,17 @@ function getOrCreateSessionToken(): string {
                   <input type="text" [(ngModel)]="form.title" placeholder="e.g. Smart Water Leak Detection">
                 </div>
                 <div class="field">
-                  <label>Sector *</label>
+                  <label>Sector <span class="opt">optional</span></label>
                   <select [(ngModel)]="form.sector">
-                    <option value="">Select a sector...</option>
+                    <option value="">Any sector...</option>
                     <option *ngFor="let s of sectors" [value]="s.value">{{ s.label }}</option>
                   </select>
                 </div>
               </div>
-              
+
               <div class="field" style="margin-top: 20px;">
-                <label>Problem Description *</label>
-                <textarea [(ngModel)]="form.description" rows="4" placeholder="Describe the problem you are trying to solve..."></textarea>
+                <label>Problem Description <span class="opt">optional</span></label>
+                <textarea [(ngModel)]="form.description" rows="4" placeholder="Describe the problem in more detail to improve match quality..."></textarea>
               </div>
 
               <div class="form-actions" style="margin-top: 32px;">
@@ -148,6 +148,7 @@ function getOrCreateSessionToken(): string {
     @media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } .form-head, .form-body { padding: 24px; } }
 
     .field label { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--c-text-faint); margin-bottom: 8px; }
+    .opt { font-size: 10px; font-weight: 500; text-transform: none; letter-spacing: 0; color: var(--c-text-faint); opacity: 0.65; margin-left: 6px; }
     .field input, .field select, .field textarea { 
       width: 100%; background: rgba(255,255,255,0.8); border: 1px solid var(--c-line-soft); 
       border-radius: 12px; padding: 12px 16px; font-size: 15px; color: var(--c-text); outline: none; 
@@ -208,7 +209,7 @@ export class GuestMatcherComponent implements OnInit {
 
   ngOnInit(): void {
     this.sessionToken = getOrCreateSessionToken();
-    const savedData = localStorage.getItem(SESSION_DATA_KEY);
+    const savedData = sessionStorage.getItem(SESSION_DATA_KEY);
     if (savedData) {
       try {
         const res = JSON.parse(savedData);
@@ -221,7 +222,7 @@ export class GuestMatcherComponent implements OnInit {
   }
 
   isFormValid(): boolean {
-    return !!this.form.title.trim() && !!this.form.description.trim() && !!this.form.sector;
+    return !!this.form.title.trim();
   }
 
   submit(): void {
@@ -234,7 +235,7 @@ export class GuestMatcherComponent implements OnInit {
       session_token: this.sessionToken,
     }).subscribe({
       next: (res: any) => {
-        localStorage.setItem(SESSION_DATA_KEY, JSON.stringify(res));
+        sessionStorage.setItem(SESSION_DATA_KEY, JSON.stringify(res));
         this.applyResults(res);
         this.showForm = false;
         this.loading = false;
@@ -263,8 +264,8 @@ export class GuestMatcherComponent implements OnInit {
   }
 
   resetSession(): void {
-    localStorage.removeItem(SESSION_KEY);
-    localStorage.removeItem(SESSION_DATA_KEY);
+    sessionStorage.removeItem(SESSION_KEY);
+    sessionStorage.removeItem(SESSION_DATA_KEY);
     this.sessionToken = getOrCreateSessionToken();
     this.hasResults = false;
     this.showForm = true;

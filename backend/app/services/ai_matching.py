@@ -1,8 +1,11 @@
 import logging
+import os
 from typing import List, Optional
 
 import numpy as np
 from sqlalchemy.orm import Session
+
+os.environ.setdefault("TOKENIZERS_PARALLELISM", "false")
 
 from app.models.project import Project, ReadinessLevel
 from app.models.challenge import Challenge
@@ -23,7 +26,7 @@ def _get_model():
             from sentence_transformers import SentenceTransformer
             from app.config import settings
             logger.info(f"Loading AI model: {settings.AI_MODEL_NAME}")
-            _model = SentenceTransformer(settings.AI_MODEL_NAME)
+            _model = SentenceTransformer(settings.AI_MODEL_NAME, device="cpu")
             _model.max_seq_length = settings.AI_MAX_SEQ_LENGTH
             logger.info(f"AI model loaded successfully with max_seq_length: {settings.AI_MAX_SEQ_LENGTH}")
         except Exception as e:

@@ -1,8 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
+import { Subject, Subscription } from 'rxjs';
+import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import { ApiService } from '../../../core/services/api.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { Project } from '../../../models/interfaces';
@@ -36,7 +38,7 @@ import { RevealDirective } from '../../../shared/directives/reveal.directive';
           <div class="filters-box" appReveal [delay]="200">
             <div class="search-wrap">
               <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-              <input type="text" [(ngModel)]="search" [placeholder]="'PROJECTS.SEARCH' | translate" (input)="onFilterChange()">
+              <input type="text" [ngModel]="search" (ngModelChange)="onSearchInput($event)" [placeholder]="'PROJECTS.SEARCH' | translate">
             </div>
             
             <div class="filter-group">
@@ -156,7 +158,7 @@ import { RevealDirective } from '../../../shared/directives/reveal.directive';
     .empty-icon { font-size: 48px; margin-bottom: 16px; }
   `],
 })
-export class ProjectListComponent implements OnInit {
+export class ProjectListComponent implements OnInit, OnDestroy {
   projects: Project[] = [];
   loading = false;
   search = '';
@@ -166,16 +168,52 @@ export class ProjectListComponent implements OnInit {
   skip = 0;
   limit = 12;
 
+  private searchSubject = new Subject<string>();
+  private searchSub!: Subscription;
+
   sectors = [
     'Health', 'Environment', 'Energy', 'Agriculture', 'Industry', 
     'Engineering', 'Information Technology', 'Education', 
     'Artificial Intelligence', 'Biotechnology'
   ];
 
-  constructor(public authService: AuthService, private api: ApiService) { }
+  constructor(public authService: AuthService, private api: ApiService) {}
 
   ngOnInit(): void {
     this.loadProjects();
+
+    this.searchSub = this.searchSubject.pipe(
+      debounceTime(350),
+      distinctUntilChanged(),
+      switchMap(q => {
+        this.loading = true;
+        if (!q.trim()) {
+          return this.api.getProjects({
+            sector: this.sectorFilter || undefined,
+            readiness: this.readinessFilter || undefined,
+            skip: 0, limit: this.limit,
+          });
+        }
+        return this.api.semanticSearchProjects(q, this.sectorFilter, this.readinessFilter, this.limit);
+      }),
+    ).subscribe({
+      next: res => {
+        this.projects = res.projects;
+        this.total = res.total;
+        this.skip = 0;
+        this.loading = false;
+      },
+      error: () => { this.loading = false; },
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.searchSub?.unsubscribe();
+  }
+
+  onSearchInput(value: string): void {
+    this.search = value;
+    this.searchSubject.next(value);
   }
 
   loadProjects(reset = false): void {
@@ -215,7 +253,15 @@ export class ProjectListComponent implements OnInit {
   }
 
   onFilterChange(): void {
-    this.loadProjects(true);
+    if (this.search.trim()) {
+      this.loading = true;
+      this.api.semanticSearchProjects(this.search, this.sectorFilter, this.readinessFilter, this.limit).subscribe({
+        next: res => { this.projects = res.projects; this.total = res.total; this.skip = 0; this.loading = false; },
+        error: () => { this.loading = false; },
+      });
+    } else {
+      this.loadProjects(true);
+    }
   }
 
   loadMore(): void {
