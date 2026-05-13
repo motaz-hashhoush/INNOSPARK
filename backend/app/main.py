@@ -27,7 +27,15 @@ app = FastAPI(
 # CORS configuration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:4200", "http://127.0.0.1:4200", "*"],
+    allow_origins=[
+        "http://localhost:4200",
+        "http://127.0.0.1:4200",
+        "https://localhost",
+        "http://93.127.132.59",
+        "https://93.127.132.59",
+        "http://innohub.najah.ai",
+        "https://innohub.najah.ai",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
