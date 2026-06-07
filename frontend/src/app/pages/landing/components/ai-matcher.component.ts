@@ -94,7 +94,7 @@ import { RevealDirective } from '../../../shared/directives/reveal.directive';
         </div>
 
         <div appReveal [delay]="300" style="display: flex; justify-content: center; margin-top: 48px;">
-          <a routerLink="/guest-match" class="btn btn-outline">
+          <a routerLink="/match" class="btn btn-outline">
             {{ 'LANDING.MATCHER.CTA' | translate }}
             <span class="btn-arrow">→</span>
           </a>

@@ -1,5 +1,5 @@
 from typing import Optional
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from sqlalchemy.orm import Session
 
 from app.database import get_db
@@ -7,15 +7,15 @@ from app.models.user import User, UserRole
 from app.models.challenge import Challenge, ChallengeStatus
 from app.models.project import Sector
 from app.schemas.challenge import ChallengeCreate, ChallengeUpdate, ChallengeResponse, ChallengeListResponse, GuestChallengeCreate
-from app.services.ai_matching import embed_challenge
+from app.services.ai_matching import embed_challenge_bg
 from app.utils.deps import get_current_user, require_role, get_optional_user
 
 router = APIRouter(prefix="/api/challenges", tags=["Challenges"])
 
-
 @router.post("", response_model=ChallengeResponse, status_code=201)
 def create_challenge(
     data: ChallengeCreate,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     current_user: Optional[User] = Depends(get_optional_user),
 ):
@@ -36,11 +36,8 @@ def create_challenge(
     db.commit()
     db.refresh(challenge)
 
-    # Generate embedding
-    try:
-        embed_challenge(db, challenge)
-    except Exception:
-        pass
+    # Generate embedding in background to avoid timeouts
+    background_tasks.add_task(embed_challenge_bg, challenge.id)
 
     return challenge
 
@@ -98,6 +95,7 @@ def get_challenge(
 def update_challenge(
     challenge_id: int,
     data: ChallengeUpdate,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
@@ -113,13 +111,10 @@ def update_challenge(
     for field, value in update_data.items():
         setattr(challenge, field, value)
 
-    # Re-embed if text changed
+    # Re-embed if text changed in background
     text_fields = {"title", "description", "priorities", "expected_outputs"}
     if text_fields & set(update_data.keys()):
-        try:
-            embed_challenge(db, challenge)
-        except Exception:
-            pass
+        background_tasks.add_task(embed_challenge_bg, challenge.id)
 
     db.commit()
     db.refresh(challenge)

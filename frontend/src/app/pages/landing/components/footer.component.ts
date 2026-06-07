@@ -15,7 +15,7 @@ import { TranslateModule } from '@ngx-translate/core';
           <div>
             <a routerLink="/" class="nav-logo">
               <span class="dot"></span>
-              innoPark
+              InnoSpark
             </a>
             <p class="footer-bio">{{ 'LANDING.FOOTER.BIO' | translate }}</p>
           </div>

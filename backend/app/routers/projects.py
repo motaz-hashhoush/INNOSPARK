@@ -1,5 +1,5 @@
 from typing import Optional, List
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, status
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, status, BackgroundTasks
 from sqlalchemy.orm import Session
 
 from app.database import get_db
@@ -7,7 +7,7 @@ from app.models.user import User, UserRole
 from app.models.project import Project, ProjectFile, ReadinessLevel, ProjectStatus
 from app.schemas.project import ProjectCreate, ProjectUpdate, ProjectResponse, ProjectListResponse, ProjectFileResponse
 from app.services.file_service import save_upload_file, delete_file
-from app.services.ai_matching import embed_project, classify_readiness
+from app.services.ai_matching import embed_project_bg, classify_readiness
 from app.utils.deps import get_current_user, require_role
 
 router = APIRouter(prefix="/api/projects", tags=["Projects"])
@@ -16,6 +16,7 @@ router = APIRouter(prefix="/api/projects", tags=["Projects"])
 @router.post("", response_model=ProjectResponse, status_code=201)
 def create_project(
     data: ProjectCreate,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
@@ -40,15 +41,11 @@ def create_project(
     db.commit()
     db.refresh(project)
 
-    # Auto-classify readiness and generate embedding
+    # Auto-classify readiness and generate embedding in background
     project.readiness_level = classify_readiness(project)
-    try:
-        embed_project(db, project)
-    except Exception:
-        pass  # AI model not available — skip embedding
-
     db.commit()
     db.refresh(project)
+    background_tasks.add_task(embed_project_bg, project.id)
     return project
 
 
@@ -131,6 +128,7 @@ def get_project(project_id: int, db: Session = Depends(get_db)):
 def update_project(
     project_id: int,
     data: ProjectUpdate,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
@@ -149,13 +147,10 @@ def update_project(
             value = [m.model_dump() if hasattr(m, 'model_dump') else m for m in value]
         setattr(project, field, value)
 
-    # Re-embed if text fields changed
+    # Re-embed if text fields changed in background
     text_fields = {"title", "summary", "problem", "value_proposition", "technical_outputs"}
     if text_fields & set(update_data.keys()):
-        try:
-            embed_project(db, project)
-        except Exception:
-            pass
+        background_tasks.add_task(embed_project_bg, project.id)
 
     db.commit()
     db.refresh(project)
