@@ -2,6 +2,7 @@ import { Component, OnInit, HostListener } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive, Router, NavigationEnd } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { ApiService } from './core/services/api.service';
 import { AuthService } from './core/services/auth.service';
 import { filter } from 'rxjs/operators';
 
@@ -24,6 +25,7 @@ import { filter } from 'rxjs/operators';
           <a routerLink="/challenges" routerLinkActive="active">{{ 'NAV.CHALLENGES' | translate }}</a>
           <a routerLink="/dashboard" routerLinkActive="active" *ngIf="authService.isLoggedIn()">{{ 'NAV.DASHBOARD' | translate }}</a>
           <a routerLink="/pipeline" routerLinkActive="active" *ngIf="authService.hasRole('admin', 'evaluator')">{{ 'NAV.PIPELINE' | translate }}</a>
+          <a routerLink="/review" routerLinkActive="active" *ngIf="authService.hasRole('supervisor', 'admin')">{{ 'NAV.REVIEW' | translate }}</a>
         </div>
 
         <div class="nav-actions">
@@ -37,6 +39,10 @@ import { filter } from 'rxjs/operators';
           </ng-container>
 
           <ng-container *ngIf="authService.isLoggedIn()">
+            <a routerLink="/notifications" class="notif-btn" [title]="'NAV.NOTIFICATIONS' | translate">
+              🔔
+              <span class="notif-badge" *ngIf="unreadCount > 0">{{ unreadCount }}</span>
+            </a>
             <div class="user-profile" *ngIf="authService.currentUser$ | async as user">
               <span class="user-role badge-glass">{{ user.role | uppercase }}</span>
               <span class="user-name">{{ user.full_name || user.email }}</span>
@@ -143,6 +149,18 @@ import { filter } from 'rxjs/operators';
     }
     .lang-btn:hover { background: rgba(11, 27, 61, 0.08); }
 
+    .notif-btn {
+      position: relative; display: inline-flex; align-items: center; justify-content: center;
+      width: 34px; height: 34px; border-radius: 50%; font-size: 15px; text-decoration: none;
+      background: rgba(11, 27, 61, 0.04); border: 1px solid var(--c-line-soft); transition: background 200ms;
+    }
+    .notif-btn:hover { background: rgba(11, 27, 61, 0.08); }
+    .notif-badge {
+      position: absolute; top: -4px; right: -4px; min-width: 16px; height: 16px; padding: 0 4px;
+      border-radius: 99px; background: var(--c-blue); color: white;
+      font-size: 9px; font-weight: 700; display: flex; align-items: center; justify-content: center;
+    }
+
     .user-profile { display: flex; align-items: center; gap: 10px; margin-right: 8px; }
     .user-name { font-size: 13px; font-weight: 600; color: var(--c-ink); }
     .user-role.badge-glass {
@@ -180,9 +198,11 @@ export class AppComponent implements OnInit {
   isRtl = false;
   isScrolled = false;
   isLandingPage = true;
+  unreadCount = 0;
 
   constructor(
     public authService: AuthService,
+    private api: ApiService,
     private translate: TranslateService,
     private router: Router
   ) {
@@ -193,11 +213,25 @@ export class AppComponent implements OnInit {
       filter(event => event instanceof NavigationEnd)
     ).subscribe((event: any) => {
       this.isLandingPage = event.urlAfterRedirects === '/';
+      this.refreshUnreadCount();
     });
   }
 
   ngOnInit(): void {
     this.isLandingPage = this.router.url === '/';
+    this.refreshUnreadCount();
+  }
+
+  /** Keep the bell badge current — notifications drive the review/selection flows. */
+  private refreshUnreadCount(): void {
+    if (!this.authService.isLoggedIn()) {
+      this.unreadCount = 0;
+      return;
+    }
+    this.api.getNotifications(true).subscribe({
+      next: (res) => { this.unreadCount = res.unread_count || 0; },
+      error: () => { /* the badge is cosmetic — stay silent */ },
+    });
   }
 
   @HostListener('window:scroll', [])

@@ -16,6 +16,21 @@ ALLOWED_EXTENSIONS = {
 }
 
 
+VIDEO_EXTENSIONS = {"mp4", "webm", "avi"}
+
+
+def is_video_filename(filename: Optional[str]) -> bool:
+    """True when the file extension is a Virtual Booth video format."""
+    if not filename or "." not in filename:
+        return False
+    return filename.rsplit(".", 1)[-1].lower() in VIDEO_EXTENSIONS
+
+
+def public_file_url(project_id: int, file_path: str) -> str:
+    """URL of a saved file under the /uploads static mount."""
+    return f"/uploads/{project_id}/{Path(file_path).name}"
+
+
 def get_upload_dir() -> Path:
     """Get and ensure upload directory exists."""
     upload_dir = Path(settings.UPLOAD_DIR)

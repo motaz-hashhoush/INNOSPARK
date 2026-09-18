@@ -1,10 +1,10 @@
 import { HttpInterceptorFn } from '@angular/common/http';
-import { inject } from '@angular/core';
-import { AuthService } from '../services/auth.service';
+import { TOKEN_KEY } from '../services/auth.service';
 
 export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
-  const authService = inject(AuthService);
-  const token = authService.getToken();
+  // Read storage directly: AuthService's constructor fires /auth/me, so injecting
+  // it here would be a circular dependency that errors and logs the user out on refresh.
+  const token = localStorage.getItem(TOKEN_KEY);
 
   if (token) {
     req = req.clone({

@@ -45,6 +45,19 @@ export class ApiService {
     return this.http.delete<void>(`${this.baseUrl}/projects/${id}`);
   }
 
+  /** Supervisor sign-off: approve a project for publication, or reject it. */
+  reviewProject(id: number, approved: boolean, note?: string): Observable<Project> {
+    return this.http.put<Project>(`${this.baseUrl}/projects/${id}/review`, { approved, note });
+  }
+
+  /** Set the Virtual Booth video / demo / cover image (admin only). */
+  updateProjectMedia(
+    id: number,
+    media: { video_url?: string; demo_url?: string; image_url?: string },
+  ): Observable<Project> {
+    return this.http.put<Project>(`${this.baseUrl}/projects/${id}/media`, media);
+  }
+
   // ── Challenges ──
   getChallenges(params?: any): Observable<{ challenges: Challenge[]; total: number }> {
     let httpParams = new HttpParams();
@@ -81,6 +94,11 @@ export class ApiService {
 
   updateMatchStatus(matchId: number, status: string): Observable<Match> {
     return this.http.put<Match>(`${this.baseUrl}/matching/${matchId}/status`, { status });
+  }
+
+  /** Ask the InnoPark manager to put the company in touch with a project team. */
+  contactParkManager(matchId: number, message?: string): Observable<{ message: string; contact_email: string }> {
+    return this.http.post<any>(`${this.baseUrl}/matching/${matchId}/contact`, { message });
   }
 
   // ── Guest Session ──

@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from typing import Optional, List
 from datetime import datetime
-from app.models.project import Sector, ReadinessLevel, ProjectStatus
+from app.models.project import Sector, ReadinessLevel, ProjectStatus, ApprovalStatus
 
 
 class TeamMember(BaseModel):
@@ -23,6 +23,7 @@ class ProjectCreate(BaseModel):
     attachment_url: Optional[str] = None
     dspace_uuid: Optional[str] = None
     collection: Optional[str] = None
+    image_url: Optional[str] = None
     readiness_level: ReadinessLevel = ReadinessLevel.CONCEPT
 
 
@@ -39,8 +40,22 @@ class ProjectUpdate(BaseModel):
     attachment_url: Optional[str] = None
     dspace_uuid: Optional[str] = None
     collection: Optional[str] = None
+    image_url: Optional[str] = None
     readiness_level: Optional[ReadinessLevel] = None
     status: Optional[ProjectStatus] = None
+
+
+class ProjectReview(BaseModel):
+    """Supervisor decision on a submitted project."""
+    approved: bool
+    note: Optional[str] = None
+
+
+class ProjectMediaUpdate(BaseModel):
+    """Virtual Booth media — admin only."""
+    video_url: Optional[str] = None
+    demo_url: Optional[str] = None
+    image_url: Optional[str] = None
 
 
 class ProjectFileResponse(BaseModel):
@@ -57,7 +72,11 @@ class ProjectFileResponse(BaseModel):
 class ProjectResponse(BaseModel):
     id: int
     title: str
+    title_en: Optional[str] = None
+    title_ar: Optional[str] = None
     summary: Optional[str]
+    description_en: Optional[str] = None
+    description_ar: Optional[str] = None
     problem: str
     value_proposition: Optional[str]
     sector: Optional[str]
@@ -68,8 +87,15 @@ class ProjectResponse(BaseModel):
     attachment_url: Optional[str]
     dspace_uuid: Optional[str]
     collection: Optional[str]
+    image_url: Optional[str] = None
+    video_url: Optional[str] = None
+    demo_url: Optional[str] = None
     readiness_level: ReadinessLevel
     status: ProjectStatus
+    approval_status: ApprovalStatus = ApprovalStatus.PENDING
+    reviewed_by: Optional[int] = None
+    reviewed_at: Optional[datetime] = None
+    review_note: Optional[str] = None
     created_by: int
     created_at: datetime
     updated_at: datetime

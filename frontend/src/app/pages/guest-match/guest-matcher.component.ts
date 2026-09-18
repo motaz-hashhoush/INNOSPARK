@@ -84,6 +84,14 @@ function getOrCreateSessionToken(): string {
                 <textarea [(ngModel)]="form.description" rows="4" placeholder="Describe the problem you are trying to solve..."></textarea>
               </div>
 
+              <div class="error-alert" *ngIf="error">
+                <span class="icon">⚠️</span>
+                <div>
+                  <strong>Matching failed</strong>
+                  <p>{{ error }}</p>
+                </div>
+              </div>
+
               <div class="form-actions" style="margin-top: 32px;">
                 <button class="btn btn-primary btn-lg" [disabled]="loading || !isFormValid()" (click)="submit()">
                   <span *ngIf="!loading">⚡ Find Matching Projects</span>
@@ -104,6 +112,20 @@ function getOrCreateSessionToken(): string {
               </div>
             </div>
 
+            <!-- Empty state: no relevant projects found -->
+            <div class="empty-state-card glass" *ngIf="matches.length === 0">
+              <span class="icon">🔍</span>
+              <h3 class="h-card">No matching projects found</h3>
+              <p>
+                We couldn't find any projects relevant to your challenge yet.
+                Try broadening your description or using different keywords — or browse all projects manually.
+              </p>
+              <div style="display: flex; gap: 12px; justify-content: center; margin-top: 20px;">
+                <button class="btn btn-primary btn-sm" (click)="toggleForm()">Edit Challenge</button>
+                <a routerLink="/projects" class="btn btn-outline btn-sm">Browse All Projects</a>
+              </div>
+            </div>
+
             <div class="match-grid">
               <article *ngFor="let m of matches; let i = index" class="match-item glass" [style.animation-delay]="i * 0.1 + 's'">
                 <div class="match-score">
@@ -113,6 +135,7 @@ function getOrCreateSessionToken(): string {
                 <div class="match-content">
                   <span class="sector">{{ m.project_sector | titlecase }}</span>
                   <h3 class="title">{{ m.project_title }}</h3>
+                  <p class="reason" *ngIf="m.match_reason">{{ m.match_reason }}</p>
                   <div class="actions">
                     <a [routerLink]="['/projects', m.project_id]" class="btn btn-primary btn-sm">Details</a>
                   </div>
@@ -120,7 +143,7 @@ function getOrCreateSessionToken(): string {
               </article>
             </div>
 
-            <div class="results-cta glass" style="margin-top: 40px; text-align: center; padding: 40px;">
+            <div class="results-cta glass" style="margin-top: 40px; text-align: center; padding: 40px;" *ngIf="matches.length > 0">
               <h3 class="h-card">Found what you were looking for?</h3>
               <p style="margin: 12px 0 24px; color: var(--c-text-mute);">Register now to contact these teams and start a collaboration.</p>
               <div style="display: flex; gap: 12px; justify-content: center;">
@@ -181,6 +204,23 @@ function getOrCreateSessionToken(): string {
     .match-content { flex: 1; }
     .match-content .sector { font-size: 10px; font-weight: 700; color: var(--c-blue); text-transform: uppercase; }
     .match-content .title { font-size: 17px; font-weight: 700; color: var(--c-ink); margin: 4px 0 0; }
+    .match-content .reason { font-size: 13px; color: var(--c-text-mute); margin: 8px 0 0; line-height: 1.5; }
+
+    .error-alert {
+      display: flex; gap: 14px; align-items: flex-start; margin-top: 24px;
+      padding: 16px 20px; border-radius: 16px;
+      background: rgba(239, 68, 68, 0.06); border: 1px solid rgba(239, 68, 68, 0.25);
+    }
+    .error-alert .icon { font-size: 20px; }
+    .error-alert strong { display: block; font-size: 14px; color: #b91c1c; margin-bottom: 2px; }
+    .error-alert p { font-size: 13px; color: var(--c-text-mute); margin: 0; line-height: 1.5; }
+
+    .empty-state-card {
+      text-align: center; padding: 48px 32px; border-radius: 24px;
+      border: 1px dashed var(--c-line-soft);
+    }
+    .empty-state-card .icon { font-size: 32px; display: block; margin-bottom: 12px; }
+    .empty-state-card p { max-width: 48ch; margin: 12px auto 0; color: var(--c-text-mute); font-size: 14px; line-height: 1.6; }
 
     .glass { background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(20px); }
   `]

@@ -11,7 +11,6 @@ class ChallengeCreate(BaseModel):
     sector: Sector
     priorities: Optional[str] = None
     expected_outputs: Optional[str] = None
-    budget: Optional[float] = None
     is_public: bool = True
 
 
@@ -30,7 +29,6 @@ class ChallengeUpdate(BaseModel):
     sector: Optional[Sector] = None
     priorities: Optional[str] = None
     expected_outputs: Optional[str] = None
-    budget: Optional[float] = None
     is_public: Optional[bool] = None
     status: Optional[ChallengeStatus] = None
 

@@ -23,6 +23,13 @@ class ReadinessLevel(str, enum.Enum):
     PILOT_READY = "pilot_ready"
 
 
+class ApprovalStatus(str, enum.Enum):
+    """Supervisor sign-off before a project is published to the Virtual Booth."""
+    PENDING = "pending"
+    APPROVED = "approved"
+    REJECTED = "rejected"
+
+
 class ProjectStatus(str, enum.Enum):
     SUBMITTED = "submitted"
     UNDER_REVIEW = "under_review"
@@ -40,6 +47,12 @@ class Project(Base):
     title = Column(String(500), nullable=False)
     summary = Column(Text, nullable=True)
 
+    # Bilingual title + descriptions (auto-generated from the source text via LLM)
+    title_en = Column(Text, nullable=True)
+    title_ar = Column(Text, nullable=True)
+    description_en = Column(Text, nullable=True)
+    description_ar = Column(Text, nullable=True)
+
     # Core details
     problem = Column(Text, nullable=False)
     value_proposition = Column(Text, nullable=True)
@@ -52,9 +65,20 @@ class Project(Base):
     dspace_uuid = Column(String(36), nullable=True)
     collection = Column(Text, nullable=True)
 
+    # Virtual Booth media — video/demo are uploaded by the admin only
+    image_url = Column(String(500), nullable=True)
+    video_url = Column(String(500), nullable=True)
+    demo_url = Column(String(500), nullable=True)
+
     # Classification
     readiness_level = Column(Enum(ReadinessLevel), default=ReadinessLevel.CONCEPT)
     status = Column(Enum(ProjectStatus), default=ProjectStatus.SUBMITTED)
+
+    # Supervisor review — only approved projects are published publicly
+    approval_status = Column(Enum(ApprovalStatus), default=ApprovalStatus.PENDING, nullable=False)
+    reviewed_by = Column(Integer, ForeignKey("users.id"), nullable=True)
+    reviewed_at = Column(DateTime, nullable=True)
+    review_note = Column(Text, nullable=True)
 
     # AI embedding (stored as JSON array of floats)
     embedding = Column(JSON, nullable=True)
@@ -67,6 +91,7 @@ class Project(Base):
     # Relationships
     supervisor = relationship("User", foreign_keys=[supervisor_id])
     creator = relationship("User", foreign_keys=[created_by])
+    reviewer = relationship("User", foreign_keys=[reviewed_by])
     files = relationship("ProjectFile", back_populates="project", cascade="all, delete-orphan")
 
 

@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
+import { AuthService } from '../../../core/services/auth.service';
 import { RevealDirective } from '../../../shared/directives/reveal.directive';
 
 @Component({
@@ -27,7 +28,9 @@ import { RevealDirective } from '../../../shared/directives/reveal.directive';
                   <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
                 </span>
               </a>
-              <a routerLink="/challenges/submit" class="btn btn-outline">{{ 'LANDING.CTA.BTN_CHALLENGE' | translate }}</a>
+              <!-- Posting a challenge is reserved for companies. -->
+              <a routerLink="/challenges/submit" class="btn btn-outline"
+                 *ngIf="!authService.isLoggedIn() || authService.hasRole('company', 'admin')">{{ 'LANDING.CTA.BTN_CHALLENGE' | translate }}</a>
             </div>
           </div>
         </div>
@@ -67,4 +70,6 @@ import { RevealDirective } from '../../../shared/directives/reveal.directive';
     @media (max-width: 600px) { .cta { margin: 40px 16px; padding: 60px 28px; border-radius: 24px; } }
   `]
 })
-export class CtaComponent {}
+export class CtaComponent {
+  constructor(public authService: AuthService) {}
+}

@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ApiService } from '../../../core/services/api.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { Project } from '../../../models/interfaces';
@@ -26,8 +26,12 @@ import { RevealDirective } from '../../../shared/directives/reveal.directive';
               <p class="lead" style="margin-top: 12px;">Discover high-potential graduation projects from An-Najah's brightest minds.</p>
             </div>
             <div appReveal [delay]="140">
-              <a routerLink="/projects/submit" class="btn btn-primary" *ngIf="authService.isLoggedIn() && authService.currentUser?.role !== 'company'">
-                + Submit Your Project
+              <!-- Projects come from the Najah Repository; only the admin ingests them. -->
+              <a routerLink="/projects/submit" class="btn btn-primary" *ngIf="authService.hasRole('admin')">
+                + Add Repository Project
+              </a>
+              <a routerLink="/review" class="btn btn-outline" *ngIf="authService.hasRole('supervisor')">
+                Review My Projects
               </a>
             </div>
           </div>
@@ -67,8 +71,8 @@ import { RevealDirective } from '../../../shared/directives/reveal.directive';
                 <span class="sep"></span>
                 <span>{{ project.created_at | date:'yyyy' }} Cohort</span>
               </div>
-              <h3 class="proj-title">{{ project.title }}</h3>
-              <p class="proj-desc">{{ (project.summary || project.problem) | slice:0:100 }}...</p>
+              <h3 class="proj-title" [attr.dir]="isArabic ? 'rtl' : null">{{ displayTitle(project) }}</h3>
+              <p class="proj-desc" [attr.dir]="isArabic ? 'rtl' : null">{{ displaySummary(project) | slice:0:100 }}...</p>
               
               <div class="proj-footer">
                 <span class="readiness" [ngClass]="project.readiness_level">
@@ -172,10 +176,31 @@ export class ProjectListComponent implements OnInit {
     'Artificial Intelligence', 'Biotechnology'
   ];
 
-  constructor(public authService: AuthService, private api: ApiService) { }
+  constructor(
+    public authService: AuthService,
+    private api: ApiService,
+    private translate: TranslateService,
+  ) { }
 
   ngOnInit(): void {
     this.loadProjects();
+  }
+
+  /** True when the UI is in Arabic, so booth cards use the Arabic copy. */
+  get isArabic(): boolean {
+    return this.translate.currentLang === 'ar';
+  }
+
+  /** Project title in the active language, falling back to the stored original. */
+  displayTitle(project: Project): string {
+    const preferred = this.isArabic ? project.title_ar : project.title_en;
+    return preferred || project.title;
+  }
+
+  /** Card blurb in the active language, falling back to the raw fields. */
+  displaySummary(project: Project): string {
+    const preferred = this.isArabic ? project.description_ar : project.description_en;
+    return preferred || project.summary || project.problem || '';
   }
 
   loadProjects(reset = false): void {

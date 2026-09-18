@@ -19,8 +19,15 @@ def create_challenge(
     db: Session = Depends(get_db),
     current_user: Optional[User] = Depends(get_optional_user),
 ):
-    """Create a new industry challenge. Company/Admin challenges are full-featured.
-    Guests can also submit challenges — they are saved as is_guest=True."""
+    """Create a new industry challenge. Posting a challenge is reserved for
+    companies (and admins) — students and supervisors are not allowed. Anonymous
+    visitors can still try the matcher; their challenges are saved as is_guest=True."""
+    if current_user and current_user.role not in (UserRole.COMPANY, UserRole.ADMIN):
+        raise HTTPException(
+            status_code=403,
+            detail="Only companies can post challenges",
+        )
+
     challenge = Challenge(
         company_id=current_user.id if current_user else None,
         is_guest=False if current_user else True,
@@ -29,7 +36,6 @@ def create_challenge(
         sector=data.sector,
         priorities=data.priorities,
         expected_outputs=data.expected_outputs,
-        budget=data.budget,
         is_public=data.is_public if current_user else True,  # guest challenges always public
     )
     db.add(challenge)

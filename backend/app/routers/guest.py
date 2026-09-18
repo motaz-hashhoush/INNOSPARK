@@ -8,29 +8,24 @@ the session token so users can revisit their results within the same session.
 No account required — challenges created here are marked is_guest=True
 and are NOT listed in the public challenge feed.
 """
-from typing import List, Optional
+from datetime import datetime
+from typing import List
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 
 from app.database import get_db
-from app.models.challenge import Challenge, ChallengeStatus
-from app.models.project import Project
-from app.models.match import Match, MatchStatus
+from app.models.challenge import ChallengeStatus
+from app.models.match import MatchStatus
 from app.schemas.challenge import GuestChallengeCreate, ChallengeResponse
 from app.schemas.match import MatchResponse
-from app.services.ai_matching import embed_challenge, run_matching
+from app.services.ai_matching import find_matches
 
 router = APIRouter(prefix="/api/guest", tags=["Guest Session"])
 
 
 # ── Response Schemas ─────────────────────────────────────────────────────────
-
-class GuestMatchResult(BaseModel):
-    challenge: ChallengeResponse
-    matches: List[MatchResponse]
-    total: int
-
 
 class GuestSessionResponse(BaseModel):
     challenge: ChallengeResponse
@@ -39,8 +34,6 @@ class GuestSessionResponse(BaseModel):
 
 
 # ── Endpoints ─────────────────────────────────────────────────────────────────
-from datetime import datetime
-from app.services.ai_matching import generate_embedding, compute_similarity
 
 @router.post("/match", response_model=GuestSessionResponse)
 def guest_match(
@@ -49,46 +42,38 @@ def guest_match(
     db: Session = Depends(get_db),
 ):
     """
-    Submit a challenge description as a guest and receive AI match results
+    Submit a challenge description as a guest and receive smart match results
     immediately. Does NOT save to the database.
-    """
-    # 1. Build text for embedding
-    parts = [data.title, data.description]
-    if data.priorities:
-        parts.append(data.priorities)
-    if data.expected_outputs:
-        parts.append(data.expected_outputs)
-    text = " ".join(parts)
 
-    # 2. Generate embedding
+    Matching pipeline: hybrid structured scoring (sector, keywords, readiness,
+    embeddings) with a relevance threshold, then LLM reranking. An empty
+    `matches` list means no relevant projects were found.
+    """
     try:
-        embedding = generate_embedding(text)
+        ranked = find_matches(
+            db,
+            title=data.title,
+            description=data.description,
+            sector=data.sector,
+            priorities=data.priorities,
+            expected_outputs=data.expected_outputs,
+            top_k=top_k,
+        )
     except Exception as e:
         raise HTTPException(
             status_code=503,
-            detail=f"AI model unavailable: {str(e)}. Please try again later."
+            detail=f"AI matching is temporarily unavailable: {str(e)}. Please try again later."
         )
 
-    # 3. Fetch projects and compute similarities in memory
-    projects = db.query(Project).filter(Project.embedding.isnot(None)).all()
-    
-    scored = []
-    for project in projects:
-        score = compute_similarity(embedding, project.embedding)
-        scored.append((project, score))
-
-    # Sort by score descending, take top_k
-    scored.sort(key=lambda x: x[1], reverse=True)
-    scored = scored[:top_k]
-
-    # 4. Construct mock response objects (not saved to DB)
+    # Construct mock response objects (not saved to DB)
     match_results = []
-    for i, (project, score) in enumerate(scored):
+    for i, (project, score, reason) in enumerate(ranked):
         match_results.append(MatchResponse(
             id=i + 1,  # Mock ID
             project_id=project.id,
             challenge_id=0,  # Mock ID
             similarity_score=round(score, 4),
+            match_reason=reason,
             status=MatchStatus.SUGGESTED,
             created_at=datetime.utcnow(),
             project_title=project.title,

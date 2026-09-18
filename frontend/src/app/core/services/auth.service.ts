@@ -4,6 +4,8 @@ import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { User, AuthToken } from '../../models/interfaces';
 
+export const TOKEN_KEY = 'access_token';
+
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private baseUrl = environment.apiUrl;
@@ -31,7 +33,7 @@ export class AuthService {
   login(email: string, password: string): Observable<AuthToken> {
     return this.http.post<AuthToken>(`${this.baseUrl}/auth/login`, { email, password }).pipe(
       tap((token) => {
-        localStorage.setItem('access_token', token.access_token);
+        localStorage.setItem(TOKEN_KEY, token.access_token);
         this.loadUser();
       })
     );
@@ -44,12 +46,12 @@ export class AuthService {
   }
 
   logout(): void {
-    localStorage.removeItem('access_token');
+    localStorage.removeItem(TOKEN_KEY);
     this.currentUserSubject.next(null);
   }
 
   getToken(): string | null {
-    return localStorage.getItem('access_token');
+    return localStorage.getItem(TOKEN_KEY);
   }
 
   isLoggedIn(): boolean {

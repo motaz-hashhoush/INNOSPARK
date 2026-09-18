@@ -11,6 +11,12 @@ class NotificationType(str, enum.Enum):
     NEW_CHALLENGE = "new_challenge"
     COMPANY_REQUEST = "company_request"
     SYSTEM = "system"
+    # Review workflow + stakeholder alerts
+    PROJECT_SUBMITTED = "project_submitted"   # supervisor: a project needs review
+    PROJECT_REVIEWED = "project_reviewed"     # creator/admin: approved or rejected
+    PROJECT_EDITED = "project_edited"         # admin: a supervisor edited a project
+    PROJECT_SELECTED = "project_selected"     # admin/park manager/VP: company picked a project
+    CONTACT_REQUEST = "contact_request"       # admin/park manager: company asked to be put in touch
 
 
 class Notification(Base):

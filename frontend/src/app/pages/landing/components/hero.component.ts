@@ -75,7 +75,9 @@ interface Particle {
             {{ 'LANDING.HERO.CTA_EXPLORE' | translate }}
             <span class="btn-arrow">→</span>
           </a>
-          <a routerLink="/projects/submit" class="btn btn-outline">{{ 'LANDING.HERO.CTA_SUBMIT' | translate }}</a>
+          <!-- Projects are ingested from the Najah Repository, so the public CTA
+               points companies at the challenge flow instead of a submit form. -->
+          <a routerLink="/challenges" class="btn btn-outline">{{ 'LANDING.HERO.CTA_CHALLENGES' | translate }}</a>
         </div>
 
         <div appReveal [delay]="520" class="hero-meta">

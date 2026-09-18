@@ -1,8 +1,12 @@
+export type UserRole =
+  | 'student' | 'supervisor' | 'company' | 'evaluator'
+  | 'admin' | 'park_manager' | 'vp_innovation';
+
 export interface User {
   id: number;
   email: string;
   full_name: string;
-  role: 'student' | 'supervisor' | 'company' | 'evaluator' | 'admin';
+  role: UserRole;
   language_pref: string;
 }
 
@@ -23,7 +27,11 @@ export interface ProjectFile {
 export interface Project {
   id: number;
   title: string;
+  title_en?: string;
+  title_ar?: string;
   summary: string;
+  description_en?: string;
+  description_ar?: string;
   problem: string;
   value_proposition: string;
   sector: string;
@@ -34,6 +42,13 @@ export interface Project {
   attachment_url: string;
   readiness_level: 'concept' | 'prototype' | 'pilot_ready';
   status: 'submitted' | 'under_review' | 'incubation' | 'partnership' | 'marketed';
+  approval_status: 'pending' | 'approved' | 'rejected';
+  reviewed_by?: number;
+  reviewed_at?: string;
+  review_note?: string;
+  image_url?: string;
+  video_url?: string;
+  demo_url?: string;
   created_by: number;
   created_at: string;
   updated_at: string;
@@ -61,6 +76,7 @@ export interface Match {
   project_id: number;
   challenge_id: number;
   similarity_score: number;
+  match_reason?: string;
   status: 'suggested' | 'accepted' | 'rejected';
   created_at: string;
   project_title?: string;

@@ -23,6 +23,10 @@ import { AuthService } from '../../../core/services/auth.service';
           <div class="form-group">
             <label class="form-label">{{ 'AUTH.EMAIL' | translate }}</label>
             <input type="email" class="form-input" [(ngModel)]="email" name="email" required>
+            <!-- Students must use their university address. -->
+            <small class="form-hint" *ngIf="role === 'student'">
+              Use your An-Najah student email (&#64;najah.edu).
+            </small>
           </div>
           <div class="form-group">
             <label class="form-label">{{ 'AUTH.PASSWORD' | translate }}</label>
@@ -73,6 +77,7 @@ import { AuthService } from '../../../core/services/auth.service';
     }
     .auth-subtitle { color: var(--text-secondary); margin-bottom: 2rem; }
     .auth-form { margin-bottom: 1.5rem; }
+    .form-hint { display: block; margin-top: 0.35rem; font-size: 0.75rem; color: var(--text-secondary); }
     .error-msg {
       color: var(--danger); background: rgba(239, 68, 68, 0.1);
       padding: 0.6rem 1rem; border-radius: var(--radius-sm); margin-bottom: 1rem;

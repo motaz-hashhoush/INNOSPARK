@@ -11,6 +11,26 @@ class UserRole(str, enum.Enum):
     COMPANY = "company"
     EVALUATOR = "evaluator"
     ADMIN = "admin"
+    # Provisioned by an admin, not self-registration. These are the stakeholders
+    # alerted whenever a company selects a project (InnoSpark validation notes).
+    PARK_MANAGER = "park_manager"
+    VP_INNOVATION = "vp_innovation"
+
+
+# Roles that self-registration is allowed to pick.
+SELF_REGISTRABLE_ROLES = (
+    UserRole.STUDENT,
+    UserRole.SUPERVISOR,
+    UserRole.COMPANY,
+    UserRole.EVALUATOR,
+)
+
+# Roles notified about platform-wide events (project selection, edits, contact requests).
+STAKEHOLDER_ROLES = (
+    UserRole.ADMIN,
+    UserRole.PARK_MANAGER,
+    UserRole.VP_INNOVATION,
+)
 
 
 class User(Base):

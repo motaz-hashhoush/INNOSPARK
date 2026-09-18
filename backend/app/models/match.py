@@ -1,7 +1,7 @@
 import enum
 from datetime import datetime
 
-from sqlalchemy import Column, Integer, Float, Enum, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, Float, Enum, DateTime, ForeignKey, Text
 from sqlalchemy.orm import relationship
 from app.database import Base
 
@@ -19,6 +19,7 @@ class Match(Base):
     project_id = Column(Integer, ForeignKey("projects.id"), nullable=False)
     challenge_id = Column(Integer, ForeignKey("challenges.id"), nullable=False)
     similarity_score = Column(Float, nullable=False)
+    reason = Column(Text, nullable=True)  # LLM explanation of why this match was suggested
     status = Column(Enum(MatchStatus), default=MatchStatus.SUGGESTED)
     created_at = Column(DateTime, default=datetime.utcnow)
 

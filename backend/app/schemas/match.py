@@ -9,6 +9,7 @@ class MatchResponse(BaseModel):
     project_id: int
     challenge_id: int
     similarity_score: float
+    match_reason: Optional[str] = None
     status: MatchStatus
     created_at: datetime
 
@@ -28,3 +29,8 @@ class MatchListResponse(BaseModel):
 
 class MatchStatusUpdate(BaseModel):
     status: MatchStatus
+
+
+class ContactRequest(BaseModel):
+    """A company asking the InnoPark manager to broker contact with a team."""
+    message: Optional[str] = None

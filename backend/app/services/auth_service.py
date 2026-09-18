@@ -1,13 +1,38 @@
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 
-from app.models.user import User
+from app.config import settings
+from app.models.user import SELF_REGISTRABLE_ROLES, User, UserRole
 from app.schemas.user import UserCreate
 from app.utils.security import verify_password, get_password_hash, create_access_token
 
 
+def _is_university_email(email: str) -> bool:
+    """True when the address belongs to the university domain or a subdomain."""
+    domain = email.strip().lower().rsplit("@", 1)[-1] if "@" in email else ""
+    root = settings.STUDENT_EMAIL_DOMAIN.lower()
+    return domain == root or domain.endswith(f".{root}")
+
+
 def register_user(db: Session, user_data: UserCreate) -> User:
     """Register a new user."""
+    if user_data.role not in SELF_REGISTRABLE_ROLES:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="This role is assigned by an administrator and cannot be self-registered",
+        )
+
+    # Students must sign up with their An-Najah university address
+    if (
+        user_data.role == UserRole.STUDENT
+        and settings.ENFORCE_STUDENT_EMAIL_DOMAIN
+        and not _is_university_email(user_data.email)
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Students must register with their @{settings.STUDENT_EMAIL_DOMAIN} university email",
+        )
+
     existing = db.query(User).filter(User.email == user_data.email).first()
     if existing:
         raise HTTPException(

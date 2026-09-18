@@ -54,11 +54,6 @@ import { RevealDirective } from '../../../shared/directives/reveal.directive';
                 </select>
               </div>
 
-              <div class="field" *ngIf="authService.isLoggedIn()">
-                <label>Available Budget (Optional)</label>
-                <input type="number" [(ngModel)]="challenge.budget" name="budget" placeholder="USD">
-              </div>
-
               <div class="field full">
                 <label>Key Priorities</label>
                 <textarea [(ngModel)]="challenge.priorities" name="priorities" rows="3" placeholder="What are the most important requirements?"></textarea>
@@ -132,7 +127,7 @@ import { RevealDirective } from '../../../shared/directives/reveal.directive';
 export class ChallengeSubmitComponent {
   challenge: any = {
     title: '', description: '', sector: 'other',
-    priorities: '', expected_outputs: '', budget: null, is_public: true,
+    priorities: '', expected_outputs: '', is_public: true,
   };
   error = '';
   loading = false;

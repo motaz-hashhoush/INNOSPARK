@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { authGuard } from './core/guards/auth.guard';
+import { authGuard, roleGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
   {
@@ -19,8 +19,20 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/projects/project-list/project-list.component').then(m => m.ProjectListComponent),
   },
   {
+    // Projects are ingested from the Najah Repository — admin only.
     path: 'projects/submit',
     loadComponent: () => import('./pages/projects/project-submit/project-submit.component').then(m => m.ProjectSubmitComponent),
+    canActivate: [roleGuard('admin')],
+  },
+  {
+    // Supervisors review and approve the projects they supervise.
+    path: 'review',
+    loadComponent: () => import('./pages/review/project-review.component').then(m => m.ProjectReviewComponent),
+    canActivate: [roleGuard('supervisor', 'admin')],
+  },
+  {
+    path: 'notifications',
+    loadComponent: () => import('./pages/notifications/notifications.component').then(m => m.NotificationsComponent),
     canActivate: [authGuard],
   },
   {
@@ -33,8 +45,15 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/challenges/challenge-list/challenge-list.component').then(m => m.ChallengeListComponent),
   },
   {
+    // Posting a challenge is reserved for companies.
     path: 'challenges/submit',
     loadComponent: () => import('./pages/challenges/challenge-submit/challenge-submit.component').then(m => m.ChallengeSubmitComponent),
+    canActivate: [roleGuard('company', 'admin')],
+  },
+  {
+    // Public AI matcher — visitors can try a challenge without an account.
+    path: 'guest-match',
+    loadComponent: () => import('./pages/guest-match/guest-matcher.component').then(m => m.GuestMatcherComponent),
   },
   {
     path: 'dashboard',

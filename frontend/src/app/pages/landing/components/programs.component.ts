@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
+import { AuthService } from '../../../core/services/auth.service';
 import { RevealDirective } from '../../../shared/directives/reveal.directive';
 
 @Component({
@@ -30,7 +31,7 @@ import { RevealDirective } from '../../../shared/directives/reveal.directive';
               <h3 class="prog-title">{{ it.titleKey | translate }}</h3>
               <p class="prog-desc">{{ it.descKey | translate }}</p>
               <div class="prog-links">
-                <a *ngFor="let link of it.links" [routerLink]="link.path" class="prog-link">
+                <a *ngFor="let link of visibleLinks(it)" [routerLink]="link.path" class="prog-link">
                   <span>{{ link.labelKey | translate }}</span>
                   <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
                 </a>
@@ -85,18 +86,22 @@ import { RevealDirective } from '../../../shared/directives/reveal.directive';
   `]
 })
 export class ProgramsComponent {
-  items = [
+  constructor(private authService: AuthService) {}
+
+  items: { catKey: string; titleKey: string; thumbBg: string; descKey: string; links: { labelKey: string; path: string; companyOnly?: boolean }[] }[] = [
     {
       catKey: 'LANDING.PROGRAMS.P1_CAT', titleKey: 'LANDING.PROGRAMS.P1_TITLE',
       thumbBg: "url('assets/images/program-booth.png')",
       descKey: 'LANDING.PROGRAMS.P1_DESC',
-      links: [{ labelKey: 'LANDING.PROGRAMS.P1_L1', path: '/projects' }, { labelKey: 'LANDING.PROGRAMS.P1_L2', path: '/projects/submit' }],
+      // The booth is browse-only for visitors — projects come from the repository.
+      links: [{ labelKey: 'LANDING.PROGRAMS.P1_L1', path: '/projects' }, { labelKey: 'LANDING.PROGRAMS.P1_L2', path: '/guest-match' }],
     },
     {
       catKey: 'LANDING.PROGRAMS.P2_CAT', titleKey: 'LANDING.PROGRAMS.P2_TITLE',
       thumbBg: "url('assets/images/program-challenges.png')",
       descKey: 'LANDING.PROGRAMS.P2_DESC',
-      links: [{ labelKey: 'LANDING.PROGRAMS.P2_L1', path: '/challenges' }, { labelKey: 'LANDING.PROGRAMS.P2_L2', path: '/challenges/submit' }],
+      // Posting a challenge is reserved for companies.
+      links: [{ labelKey: 'LANDING.PROGRAMS.P2_L1', path: '/challenges' }, { labelKey: 'LANDING.PROGRAMS.P2_L2', path: '/challenges/submit', companyOnly: true }],
     },
     {
       catKey: 'LANDING.PROGRAMS.P3_CAT', titleKey: 'LANDING.PROGRAMS.P3_TITLE',
@@ -111,4 +116,10 @@ export class ProgramsComponent {
       links: [{ labelKey: 'LANDING.PROGRAMS.P4_L1', path: '/pipeline' }, { labelKey: 'LANDING.PROGRAMS.P4_L2', path: '/auth/register' }],
     },
   ];
+
+  /** Hides company-only links (e.g. "Post a Challenge") from students/supervisors. */
+  visibleLinks(item: { links: { labelKey: string; path: string; companyOnly?: boolean }[] }) {
+    const canPostChallenge = !this.authService.isLoggedIn() || this.authService.hasRole('company', 'admin');
+    return item.links.filter(l => !l.companyOnly || canPostChallenge);
+  }
 }

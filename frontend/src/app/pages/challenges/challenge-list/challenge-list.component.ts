@@ -5,7 +5,7 @@ import { RouterLink } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { ApiService } from '../../../core/services/api.service';
 import { AuthService } from '../../../core/services/auth.service';
-import { Challenge } from '../../../models/interfaces';
+import { Challenge, Match } from '../../../models/interfaces';
 import { RevealDirective } from '../../../shared/directives/reveal.directive';
 
 @Component({
@@ -26,7 +26,8 @@ import { RevealDirective } from '../../../shared/directives/reveal.directive';
               <p class="lead" style="margin-top: 12px;">Bridging the gap between industrial needs and academic innovation.</p>
             </div>
             <div appReveal [delay]="140">
-              <a routerLink="/challenges/submit" class="btn btn-primary">
+              <!-- Posting a challenge is reserved for companies. -->
+              <a routerLink="/challenges/submit" class="btn btn-primary" *ngIf="authService.hasRole('company', 'admin')">
                 + Post a Challenge
               </a>
             </div>
@@ -60,14 +61,22 @@ import { RevealDirective } from '../../../shared/directives/reveal.directive';
               
               <div class="proj-footer">
                 <div class="card-meta">
-                  <span *ngIf="c.budget" class="budget">💰 $ {{ c.budget | number }}</span>
                   <span class="date">{{ c.created_at | date:'mediumDate' }}</span>
                 </div>
                 
                 <button class="btn btn-ghost btn-sm" (click)="runMatch(c.id)"
-                        *ngIf="authService.hasRole('company', 'admin', 'evaluator')">
-                  🤖 AI Match
+                        *ngIf="authService.hasRole('company', 'admin', 'evaluator')"
+                        [disabled]="matchLoading[c.id]">
+                  {{ matchLoading[c.id] ? '⏳ Matching...' : '🤖 AI Match' }}
                 </button>
+              </div>
+
+              <div class="match-error" *ngIf="matchErrors[c.id]">
+                ⚠️ {{ matchErrors[c.id] }}
+              </div>
+
+              <div class="match-empty" *ngIf="matchRan[c.id] && !matchErrors[c.id] && !matchResults[c.id]?.length">
+                🔍 No matching projects found for this challenge yet.
               </div>
 
               <div class="match-results-box" *ngIf="matchResults[c.id]?.length">
@@ -76,8 +85,15 @@ import { RevealDirective } from '../../../shared/directives/reveal.directive';
                   <div class="match-mini-item" *ngFor="let m of matchResults[c.id] | slice:0:3">
                     <a [routerLink]="['/projects', m.project_id]">{{ m.project_title }}</a>
                     <span class="score">{{ (m.similarity_score * 100).toFixed(0) }}%</span>
+                    <!-- Companies never contact teams directly — the park manager brokers it. -->
+                    <button class="contact-btn" (click)="contactParkManager(m)"
+                            *ngIf="authService.hasRole('company', 'admin')"
+                            [disabled]="contactSent[m.id]">
+                      {{ contactSent[m.id] ? '✓ Requested' : '✉ Select & contact InnoPark' }}
+                    </button>
                   </div>
                 </div>
+                <p class="contact-note" *ngIf="contactMessage">{{ contactMessage }}</p>
               </div>
             </div>
           </article>
@@ -122,8 +138,16 @@ import { RevealDirective } from '../../../shared/directives/reveal.directive';
 
     .proj-footer { display: flex; justify-content: space-between; align-items: center; padding-top: 20px; border-top: 1px solid var(--c-line-soft); }
     .card-meta { display: flex; flex-direction: column; gap: 4px; }
-    .card-meta .budget { font-size: 13px; font-weight: 700; color: var(--c-ink); }
     .card-meta .date { font-size: 11px; color: var(--c-text-faint); }
+
+    .match-error {
+      margin-top: 16px; padding: 10px 14px; border-radius: 12px; font-size: 12px; font-weight: 600;
+      background: rgba(239, 68, 68, 0.06); border: 1px solid rgba(239, 68, 68, 0.25); color: #b91c1c;
+    }
+    .match-empty {
+      margin-top: 16px; padding: 10px 14px; border-radius: 12px; font-size: 12px; font-weight: 600;
+      background: rgba(30, 107, 255, 0.04); border: 1px dashed rgba(30, 107, 255, 0.2); color: var(--c-text-mute);
+    }
 
     .match-results-box { margin-top: 24px; padding: 16px; background: rgba(30, 107, 255, 0.04); border-radius: 16px; border: 1px solid rgba(30, 107, 255, 0.1); }
     .match-results-box h4 { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: var(--c-blue); margin-bottom: 12px; }
@@ -132,6 +156,14 @@ import { RevealDirective } from '../../../shared/directives/reveal.directive';
     .match-mini-item a { color: var(--c-ink); font-weight: 600; text-decoration: none; max-width: 18ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .match-mini-item a:hover { color: var(--c-blue); }
     .match-mini-item .score { font-weight: 700; color: var(--c-blue); }
+    .contact-btn {
+      border: 1px solid rgba(30, 107, 255, 0.3); background: white; cursor: pointer;
+      font-size: 10px; font-weight: 700; color: var(--c-blue);
+      padding: 3px 10px; border-radius: 99px; white-space: nowrap; transition: all 200ms;
+    }
+    .contact-btn:hover:not(:disabled) { background: var(--c-blue); color: white; }
+    .contact-btn:disabled { opacity: 0.6; cursor: default; }
+    .contact-note { margin-top: 12px; font-size: 11px; font-weight: 600; color: var(--c-text-mute); }
 
     .empty-state { text-align: center; padding: 80px 0; color: var(--c-text-faint); }
     .empty-icon { font-size: 48px; margin-bottom: 16px; }
@@ -140,6 +172,11 @@ import { RevealDirective } from '../../../shared/directives/reveal.directive';
 export class ChallengeListComponent implements OnInit {
   challenges: Challenge[] = [];
   matchResults: { [id: number]: any[] } = {};
+  matchErrors: { [id: number]: string } = {};
+  matchLoading: { [id: number]: boolean } = {};
+  matchRan: { [id: number]: boolean } = {};
+  contactSent: { [matchId: number]: boolean } = {};
+  contactMessage = '';
   loading = false;
 
   constructor(public authService: AuthService, private api: ApiService) {}
@@ -162,13 +199,44 @@ export class ChallengeListComponent implements OnInit {
         if (res.matches && res.matches.length > 0) {
           this.matchResults[challengeId] = res.matches;
         }
-      }
+      },
+      error: () => { /* results are optional on initial load — errors surface via runMatch */ },
     });
   }
 
   runMatch(challengeId: number): void {
+    this.matchLoading[challengeId] = true;
+    delete this.matchErrors[challengeId];
     this.api.runMatching(challengeId).subscribe({
-      next: (res) => { this.matchResults[challengeId] = res.matches; },
+      next: (res) => {
+        this.matchResults[challengeId] = res.matches;
+        this.matchRan[challengeId] = true;
+        this.matchLoading[challengeId] = false;
+      },
+      error: (err) => {
+        this.matchErrors[challengeId] = err?.error?.detail || 'AI matching failed. Please try again later.';
+        this.matchLoading[challengeId] = false;
+      },
+    });
+  }
+
+  /**
+   * Mark the project as selected and ask the InnoPark manager to broker contact.
+   * Companies do not reach out to student teams themselves.
+   */
+  contactParkManager(match: Match): void {
+    this.contactMessage = '';
+    this.api.updateMatchStatus(match.id, 'accepted').subscribe({
+      error: () => { /* selection is best-effort; the contact request is what matters */ },
+    });
+    this.api.contactParkManager(match.id).subscribe({
+      next: (res) => {
+        this.contactSent[match.id] = true;
+        this.contactMessage = `${res.message} You can also write to ${res.contact_email}.`;
+      },
+      error: (err) => {
+        this.contactMessage = err?.error?.detail || 'Could not reach the InnoPark manager. Please try again later.';
+      },
     });
   }
 
