@@ -2,7 +2,7 @@ from fastapi.testclient import TestClient
 
 def test_register_user(client: TestClient):
     user_data = {
-        "email": "test@example.com",
+        "email": "test@najah.edu",
         "password": "testpassword123",
         "full_name": "Test User",
         "role": "student",
@@ -13,7 +13,7 @@ def test_register_user(client: TestClient):
     assert response.status_code == 201
     
     data = response.json()
-    assert data["email"] == "test@example.com"
+    assert data["email"] == "test@najah.edu"
     assert data["full_name"] == "Test User"
     assert data["role"] == "student"
     assert "id" in data
@@ -22,7 +22,7 @@ def test_register_user(client: TestClient):
 def test_register_existing_user(client: TestClient):
     # Register first
     user_data = {
-        "email": "test2@example.com",
+        "email": "test2@najah.edu",
         "password": "testpassword123",
         "full_name": "Test User 2"
     }
@@ -36,7 +36,7 @@ def test_register_existing_user(client: TestClient):
 def test_login_user(client: TestClient):
     # Register user
     user_data = {
-        "email": "login@example.com",
+        "email": "login@najah.edu",
         "password": "loginpassword123",
         "full_name": "Login User"
     }
@@ -44,7 +44,7 @@ def test_login_user(client: TestClient):
     
     # Attempt login
     login_data = {
-        "email": "login@example.com",
+        "email": "login@najah.edu",
         "password": "loginpassword123"
     }
     response = client.post("/api/auth/login", json=login_data)
@@ -56,14 +56,14 @@ def test_login_user(client: TestClient):
 
 def test_login_invalid_password(client: TestClient):
     user_data = {
-        "email": "badauth@example.com",
+        "email": "badauth@najah.edu",
         "password": "loginpassword123",
         "full_name": "Bad Auth User"
     }
     client.post("/api/auth/register", json=user_data)
     
     login_data = {
-        "email": "badauth@example.com",
+        "email": "badauth@najah.edu",
         "password": "wrongpassword"
     }
     response = client.post("/api/auth/login", json=login_data)
@@ -72,13 +72,13 @@ def test_login_invalid_password(client: TestClient):
 def test_get_me(client: TestClient):
     # Register and login user
     user_data = {
-        "email": "me@example.com",
+        "email": "me@najah.edu",
         "password": "password123",
         "full_name": "Me User"
     }
     client.post("/api/auth/register", json=user_data)
     login_response = client.post("/api/auth/login", json={
-        "email": "me@example.com",
+        "email": "me@najah.edu",
         "password": "password123"
     })
     token = login_response.json()["access_token"]
@@ -90,5 +90,5 @@ def test_get_me(client: TestClient):
     )
     assert response.status_code == 200
     data = response.json()
-    assert data["email"] == "me@example.com"
+    assert data["email"] == "me@najah.edu"
     assert data["full_name"] == "Me User"

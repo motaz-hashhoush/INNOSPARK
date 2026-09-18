@@ -1,9 +1,10 @@
 import enum
 from datetime import datetime
 
-from sqlalchemy import Column, Integer, String, Text, Enum, DateTime, ForeignKey, JSON
+from sqlalchemy import Column, Integer, String, Text, Enum, DateTime, ForeignKey, JSON, Boolean, false
 from sqlalchemy.orm import relationship
 from app.database import Base
+from app.services.file_service import public_file_url
 
 
 class Sector(str, enum.Enum):
@@ -70,6 +71,10 @@ class Project(Base):
     video_url = Column(String(500), nullable=True)
     demo_url = Column(String(500), nullable=True)
 
+    # Virtual Booth publication — a curated subset of the project database
+    booth_published = Column(Boolean, nullable=False, default=False, server_default=false())
+    booth_published_at = Column(DateTime, nullable=True)
+
     # Classification
     readiness_level = Column(Enum(ReadinessLevel), default=ReadinessLevel.CONCEPT)
     status = Column(Enum(ProjectStatus), default=ProjectStatus.SUBMITTED)
@@ -107,3 +112,7 @@ class ProjectFile(Base):
     uploaded_at = Column(DateTime, default=datetime.utcnow)
 
     project = relationship("Project", back_populates="files")
+
+    @property
+    def url(self) -> str:
+        return public_file_url(self.project_id, self.file_path)

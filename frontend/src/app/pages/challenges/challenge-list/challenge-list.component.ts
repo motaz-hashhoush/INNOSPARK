@@ -83,7 +83,7 @@ import { RevealDirective } from '../../../shared/directives/reveal.directive';
                 <h4>Top AI Matches</h4>
                 <div class="match-mini-list">
                   <div class="match-mini-item" *ngFor="let m of matchResults[c.id] | slice:0:3">
-                    <a [routerLink]="['/projects', m.project_id]">{{ m.project_title }}</a>
+                    <a [routerLink]="[m.project_booth_published ? '/booth' : '/projects', m.project_id]">{{ m.project_title }}</a>
                     <span class="score">{{ (m.similarity_score * 100).toFixed(0) }}%</span>
                     <!-- Companies never contact teams directly — the park manager brokers it. -->
                     <button class="contact-btn" (click)="contactParkManager(m)"

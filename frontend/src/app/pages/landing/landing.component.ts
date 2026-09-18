@@ -81,7 +81,7 @@ export class LandingComponent implements OnInit {
     });
 
     // Fetch featured projects
-    this.api.getProjects({ limit: 3 }).subscribe({
+    this.api.getProjects({ limit: 3, booth: true }).subscribe({
       next: (data) => {
         this.featuredProjects = data.projects;
       },

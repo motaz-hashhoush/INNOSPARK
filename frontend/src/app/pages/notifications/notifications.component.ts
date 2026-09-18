@@ -135,6 +135,7 @@ export class NotificationsComponent implements OnInit {
       project_edited: '✏️',
       project_selected: '🤝',
       contact_request: '✉️',
+      project_published: '🎪',
       match_found: '🤖',
       status_change: '📈',
       new_challenge: '💡',

@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { Project, Challenge, Match, Notification, PipelineStage } from '../../models/interfaces';
+import { Project, Challenge, Match, Notification, PipelineStage, User } from '../../models/interfaces';
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
@@ -50,7 +50,31 @@ export class ApiService {
     return this.http.put<Project>(`${this.baseUrl}/projects/${id}/review`, { approved, note });
   }
 
-  /** Set the Virtual Booth video / demo / cover image (admin only). */
+  /** Publish a project to the Virtual Booth or withdraw it (admin or the project's supervisor). */
+  publishBooth(id: number, published: boolean): Observable<Project> {
+    return this.http.put<Project>(`${this.baseUrl}/projects/${id}/booth`, { published });
+  }
+
+  /** Collaboration request from a booth page — open to anyone. */
+  contactBooth(
+    id: number,
+    data: { name: string; email: string; organization?: string; message: string },
+  ): Observable<{ message: string; contact_email: string }> {
+    return this.http.post<any>(`${this.baseUrl}/projects/${id}/contact`, data);
+  }
+
+  deleteProjectFile(projectId: number, fileId: number): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/projects/${projectId}/files/${fileId}`);
+  }
+
+  /** Admin only — used to pick a supervisor when adding a project. */
+  getUsers(role?: string): Observable<User[]> {
+    let params = new HttpParams();
+    if (role) params = params.set('role', role);
+    return this.http.get<User[]>(`${this.baseUrl}/auth/users`, { params });
+  }
+
+  /** Set the Virtual Booth video / demo / cover image (admin or the project's supervisor). */
   updateProjectMedia(
     id: number,
     media: { video_url?: string; demo_url?: string; image_url?: string },
@@ -97,10 +121,11 @@ export class ApiService {
   }
 
   // ── Semantic search ──
-  semanticSearchProjects(q: string, sector?: string, readiness?: string, limit = 20): Observable<{ projects: Project[]; total: number }> {
+  semanticSearchProjects(q: string, sector?: string, readiness?: string, limit = 20, booth?: boolean): Observable<{ projects: Project[]; total: number }> {
     let params = new HttpParams().set('q', q).set('limit', limit);
     if (sector) params = params.set('sector', sector);
     if (readiness) params = params.set('readiness', readiness);
+    if (booth !== undefined) params = params.set('booth', booth);
     return this.http.get<any>(`${this.baseUrl}/projects/search`, { params });
   }
 

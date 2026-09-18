@@ -68,7 +68,7 @@ interface Particle {
         </div>
 
         <div appReveal [delay]="420" class="hero-cta">
-          <a routerLink="/projects" class="btn btn-primary">
+          <a routerLink="/booth" class="btn btn-primary">
             <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="margin-right: 8px;">
               <path d="M13 2L3 14h7l-1 8 11-14h-7l1-6h-1z" />
             </svg>

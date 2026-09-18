@@ -38,7 +38,7 @@ const CAT_GRADIENTS: Record<string, string> = {
             </div>
           </div>
           <div appReveal [delay]="180">
-            <a routerLink="/projects" class="btn btn-ghost" style="padding: 10px 14px;">
+            <a routerLink="/booth" class="btn btn-ghost" style="padding: 10px 14px;">
               {{ 'LANDING.FEATURED.BROWSE' | translate }}
               <span class="btn-arrow">
                 <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
@@ -50,9 +50,9 @@ const CAT_GRADIENTS: Record<string, string> = {
         <!-- API projects -->
         <div class="booth-grid" *ngIf="projects.length > 0">
           <article *ngFor="let project of projects; let i = index" class="proj" appReveal [delay]="(i % 3) * 80">
-            <div class="proj-thumb" [style.backgroundImage]="thumbGradient(project.sector)">
+            <div class="proj-thumb" [style.backgroundImage]="project.image_url ? 'url(' + project.image_url + ')' : thumbGradient(project.sector)">
               <div class="proj-match">
-                <span class="match-dot"></span> 94% match
+                <span class="match-dot"></span> Virtual Booth
               </div>
             </div>
             <div class="proj-body">
@@ -66,7 +66,7 @@ const CAT_GRADIENTS: Record<string, string> = {
               <div class="proj-tags">
                 <span class="tag">{{ (project.readiness_level || 'prototype').replace('_', ' ') | titlecase }}</span>
               </div>
-              <a [routerLink]="['/projects', project.id]" class="proj-link">{{ 'LANDING.FEATURED.VIEW' | translate }}</a>
+              <a [routerLink]="['/booth', project.id]" class="proj-link">{{ 'LANDING.FEATURED.VIEW' | translate }}</a>
             </div>
           </article>
         </div>
@@ -89,7 +89,7 @@ const CAT_GRADIENTS: Record<string, string> = {
               <div class="proj-tags">
                 <span *ngFor="let t of p.tags" class="tag">{{ t }}</span>
               </div>
-              <a routerLink="/projects" class="proj-link">{{ 'LANDING.FEATURED.VIEW' | translate }}</a>
+              <a routerLink="/booth" class="proj-link">{{ 'LANDING.FEATURED.VIEW' | translate }}</a>
             </div>
           </article>
         </div>

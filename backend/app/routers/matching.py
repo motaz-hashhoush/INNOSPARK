@@ -38,6 +38,7 @@ def run_ai_matching(
             created_at=m.created_at,
             project_title=m.project.title if m.project else None,
             project_sector=m.project.sector if m.project else None,
+            project_booth_published=m.project.booth_published if m.project else None,
             challenge_title=m.challenge.title if m.challenge else None,
         ))
 
@@ -80,6 +81,7 @@ def get_match_results(
             created_at=m.created_at,
             project_title=m.project.title if m.project else None,
             project_sector=m.project.sector if m.project else None,
+            project_booth_published=m.project.booth_published if m.project else None,
             challenge_title=m.challenge.title if m.challenge else None,
         ))
 
@@ -176,5 +178,6 @@ def update_match_status(
         created_at=match.created_at,
         project_title=match.project.title if match.project else None,
         project_sector=match.project.sector if match.project else None,
+        project_booth_published=match.project.booth_published if match.project else None,
         challenge_title=match.challenge.title if match.challenge else None,
     )

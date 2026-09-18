@@ -94,7 +94,7 @@ export class ProgramsComponent {
       thumbBg: "url('assets/images/program-booth.png')",
       descKey: 'LANDING.PROGRAMS.P1_DESC',
       // The booth is browse-only for visitors — projects come from the repository.
-      links: [{ labelKey: 'LANDING.PROGRAMS.P1_L1', path: '/projects' }, { labelKey: 'LANDING.PROGRAMS.P1_L2', path: '/guest-match' }],
+      links: [{ labelKey: 'LANDING.PROGRAMS.P1_L1', path: '/booth' }, { labelKey: 'LANDING.PROGRAMS.P1_L2', path: '/guest-match' }],
     },
     {
       catKey: 'LANDING.PROGRAMS.P2_CAT', titleKey: 'LANDING.PROGRAMS.P2_TITLE',

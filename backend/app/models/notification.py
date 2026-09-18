@@ -17,6 +17,7 @@ class NotificationType(str, enum.Enum):
     PROJECT_EDITED = "project_edited"         # admin: a supervisor edited a project
     PROJECT_SELECTED = "project_selected"     # admin/park manager/VP: company picked a project
     CONTACT_REQUEST = "contact_request"       # admin/park manager: company asked to be put in touch
+    PROJECT_PUBLISHED = "project_published"   # creator/supervisor/stakeholders: project went live in the Virtual Booth
 
 
 class Notification(Base):

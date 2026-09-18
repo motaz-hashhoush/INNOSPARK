@@ -17,7 +17,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
         <div class="nav-links">
           <a routerLink="/">{{ 'LANDING.NAV.HOME' | translate }}</a>
-          <a routerLink="/projects">{{ 'LANDING.NAV.VIRTUAL_BOOTH' | translate }}</a>
+          <a routerLink="/booth">{{ 'LANDING.NAV.VIRTUAL_BOOTH' | translate }}</a>
           <a routerLink="/challenges">{{ 'LANDING.NAV.CHALLENGES' | translate }}</a>
           <a routerLink="/pipeline">{{ 'LANDING.NAV.PIPELINE' | translate }}</a>
           <a routerLink="/dashboard">{{ 'LANDING.NAV.DASHBOARD' | translate }}</a>

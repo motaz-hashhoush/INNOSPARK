@@ -28,7 +28,7 @@ export const roleGuard = (...roles: string[]): CanActivateFn => (route, state) =
   const user = authService.currentUser;
   if (user) {
     if (roles.includes(user.role)) return true;
-    router.navigate(['/projects']);
+    router.navigate(['/booth']);
     return false;
   }
 
@@ -36,7 +36,7 @@ export const roleGuard = (...roles: string[]): CanActivateFn => (route, state) =
   return authService.getMe().pipe(
     map(u => {
       if (roles.includes(u.role)) return true;
-      router.navigate(['/projects']);
+      router.navigate(['/booth']);
       return false;
     }),
     catchError(() => {

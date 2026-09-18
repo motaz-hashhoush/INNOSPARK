@@ -78,6 +78,7 @@ def guest_match(
             created_at=datetime.utcnow(),
             project_title=project.title,
             project_sector=project.sector,
+            project_booth_published=project.booth_published,
             challenge_title=data.title,
         ))
 

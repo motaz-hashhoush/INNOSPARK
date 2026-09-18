@@ -19,14 +19,31 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/auth/register/register.component').then(m => m.RegisterComponent),
   },
   {
+    // Student Projects — the full project database (approved projects are public).
     path: 'projects',
     loadComponent: () => import('./pages/projects/project-list/project-list.component').then(m => m.ProjectListComponent),
   },
   {
-    // Projects are ingested from the Najah Repository — admin only.
+    // Admins ingest repository projects; supervisors add their own.
     path: 'projects/submit',
     loadComponent: () => import('./pages/projects/project-submit/project-submit.component').then(m => m.ProjectSubmitComponent),
-    canActivate: [roleGuard('admin')],
+    canActivate: [roleGuard('admin', 'supervisor')],
+  },
+  {
+    // Virtual Booth — curated public showcase of published projects.
+    path: 'booth',
+    loadComponent: () => import('./pages/booth/booth-list.component').then(m => m.BoothListComponent),
+  },
+  {
+    // Same form as projects/submit, but publishes to the booth on save.
+    path: 'booth/new',
+    loadComponent: () => import('./pages/projects/project-submit/project-submit.component').then(m => m.ProjectSubmitComponent),
+    canActivate: [roleGuard('admin', 'supervisor')],
+    data: { booth: true },
+  },
+  {
+    path: 'booth/:id',
+    loadComponent: () => import('./pages/booth/booth-detail.component').then(m => m.BoothDetailComponent),
   },
   {
     // Supervisors review and approve the projects they supervise.

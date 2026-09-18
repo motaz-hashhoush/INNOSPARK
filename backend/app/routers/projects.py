@@ -3,17 +3,19 @@ from typing import Optional, List
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, UploadFile, File, status
 from sqlalchemy.orm import Session
 
+from app.config import settings
 from app.database import get_db
 from app.models.notification import NotificationType
 from app.models.user import User, UserRole
 from app.models.project import Project, ProjectFile, ApprovalStatus, ReadinessLevel, ProjectStatus
 from app.schemas.project import (
     ProjectCreate, ProjectUpdate, ProjectResponse, ProjectListResponse,
-    ProjectFileResponse, ProjectMediaUpdate, ProjectReview,
+    ProjectFileResponse, ProjectMediaUpdate, ProjectReview, BoothPublish, BoothContact,
 )
 from app.services.file_service import save_upload_file, delete_file, is_video_filename, public_file_url
 from app.services.ai_matching import embed_project_bg, classify_readiness
-from app.services.notification_service import notify_stakeholders, notify_user
+from app.services.email_service import send_email
+from app.services.notification_service import notify_stakeholders, notify_user, notify_users
 from app.services.translation_service import generate_bilingual_descriptions
 from app.utils.deps import get_current_user, get_optional_user, require_role
 
@@ -40,10 +42,15 @@ def create_project(
     data: ProjectCreate,
     background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_role(UserRole.ADMIN)),
+    current_user: User = Depends(require_role(UserRole.ADMIN, UserRole.SUPERVISOR)),
 ):
-    """Ingest a graduation project. Admin only — projects come from the Najah
-    Repository, so students/companies/supervisors do not submit them here."""
+    """Add a project to the Student Projects database.
+
+    Admins ingest projects from the Najah Repository and may assign a supervisor.
+    Supervisors add their own projects: they become the supervisor and, being the
+    approver themselves, the project starts approved.
+    """
+    is_supervisor = current_user.role == UserRole.SUPERVISOR
     project = Project(
         title=data.title,
         summary=data.summary,
@@ -51,7 +58,7 @@ def create_project(
         value_proposition=data.value_proposition,
         sector=data.sector,
         team_members=[m.model_dump() for m in data.team_members],
-        supervisor_id=data.supervisor_id,
+        supervisor_id=current_user.id if is_supervisor else data.supervisor_id,
         technical_outputs=data.technical_outputs,
         development_needs=data.development_needs,
         attachment_url=data.attachment_url,
@@ -59,7 +66,9 @@ def create_project(
         collection=data.collection,
         image_url=data.image_url,
         readiness_level=data.readiness_level,
-        approval_status=ApprovalStatus.PENDING,
+        approval_status=ApprovalStatus.APPROVED if is_supervisor else ApprovalStatus.PENDING,
+        reviewed_by=current_user.id if is_supervisor else None,
+        reviewed_at=datetime.utcnow() if is_supervisor else None,
         created_by=current_user.id,
     )
     db.add(project)
@@ -68,13 +77,14 @@ def create_project(
 
     # Auto-classify readiness and generate embedding in background
     project.readiness_level = classify_readiness(project)
-    # The supervisor reviews and approves before the project is published
-    notify_user(
-        db,
-        project.supervisor_id,
-        f"New project '{project.title}' is awaiting your review and approval.",
-        NotificationType.PROJECT_SUBMITTED,
-    )
+    # An assigned supervisor reviews and approves before the project is published
+    if not is_supervisor:
+        notify_user(
+            db,
+            project.supervisor_id,
+            f"New project '{project.title}' is awaiting your review and approval.",
+            NotificationType.PROJECT_SUBMITTED,
+        )
     db.commit()
     db.refresh(project)
 
@@ -92,6 +102,7 @@ def list_projects(
     status_filter: Optional[ProjectStatus] = None,
     approval: Optional[ApprovalStatus] = None,
     supervised: bool = False,
+    booth: Optional[bool] = None,
     search: Optional[str] = None,
     skip: int = 0,
     limit: int = 20,
@@ -102,6 +113,8 @@ def list_projects(
 
     Only approved projects are public. Staff can request a specific approval
     state, and supervisors can narrow the list to the projects they supervise.
+    `booth=true` restricts the list to the curated Virtual Booth (published
+    projects are always approved, so this is safe for anonymous callers).
     """
     query = db.query(Project)
 
@@ -117,6 +130,8 @@ def list_projects(
     elif not _sees_unapproved(current_user):
         query = query.filter(Project.approval_status == ApprovalStatus.APPROVED)
 
+    if booth is not None:
+        query = query.filter(Project.booth_published.is_(booth))
     if sector:
         query = query.filter(Project.sector.ilike(f"%{sector}%"))
     if readiness:
@@ -131,7 +146,8 @@ def list_projects(
         )
 
     total = query.count()
-    projects = query.order_by(Project.created_at.desc()).offset(skip).limit(limit).all()
+    order = Project.booth_published_at.desc() if booth else Project.created_at.desc()
+    projects = query.order_by(order).offset(skip).limit(limit).all()
 
     return ProjectListResponse(projects=projects, total=total)
 
@@ -141,18 +157,30 @@ def semantic_search_projects(
     q: str,
     sector: Optional[str] = None,
     readiness: Optional[ReadinessLevel] = None,
+    booth: Optional[bool] = None,
     limit: int = 20,
     db: Session = Depends(get_db),
+    current_user: Optional[User] = Depends(get_optional_user),
 ):
-    """Semantic search using AI embeddings. Falls back to text search if model unavailable."""
+    """Semantic search using AI embeddings. Falls back to text search if model unavailable.
+
+    Applies the same visibility rules as the list endpoint.
+    """
     if not q or len(q.strip()) < 2:
-        return list_projects(sector=sector, readiness=readiness, limit=limit, db=db)
+        return list_projects(
+            sector=sector, readiness=readiness, booth=booth, limit=limit,
+            db=db, current_user=current_user,
+        )
 
     try:
         from app.services.ai_matching import generate_embedding, compute_similarity
         embedding = generate_embedding(q.strip())
 
         query = db.query(Project).filter(Project.embedding.isnot(None))
+        if booth is not None:
+            query = query.filter(Project.booth_published.is_(booth))
+        if not _sees_unapproved(current_user):
+            query = query.filter(Project.approval_status == ApprovalStatus.APPROVED)
         if sector:
             query = query.filter(Project.sector.ilike(f"%{sector}%"))
         if readiness:
@@ -167,7 +195,10 @@ def semantic_search_projects(
         return ProjectListResponse(projects=top, total=len(top))
 
     except Exception:
-        return list_projects(search=q, sector=sector, readiness=readiness, limit=limit, db=db)
+        return list_projects(
+            search=q, sector=sector, readiness=readiness, booth=booth, limit=limit,
+            db=db, current_user=current_user,
+        )
 
 
 @router.get("/{project_id}", response_model=ProjectResponse)
@@ -211,6 +242,9 @@ def review_project(
     project.reviewed_by = current_user.id
     project.reviewed_at = datetime.utcnow()
     project.review_note = data.note
+    if not data.approved:
+        # The booth only ever shows approved projects
+        project.booth_published = False
 
     verdict = "approved and published" if data.approved else "rejected"
     notify_user(
@@ -231,17 +265,105 @@ def review_project(
     return project
 
 
+@router.put("/{project_id}/booth", response_model=ProjectResponse)
+def publish_to_booth(
+    project_id: int,
+    data: BoothPublish,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Publish a project to the Virtual Booth (or withdraw it).
+
+    Admin or the project's supervisor. Publishing is the strongest sign-off, so a
+    pending/rejected project is approved at the same time. Withdrawing keeps the
+    approval.
+    """
+    project = db.query(Project).filter(Project.id == project_id).first()
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found")
+    if not _can_review(current_user, project):
+        raise HTTPException(
+            status_code=403,
+            detail="Only the assigned supervisor or an admin can publish this project",
+        )
+
+    if data.published:
+        if project.approval_status != ApprovalStatus.APPROVED:
+            project.approval_status = ApprovalStatus.APPROVED
+            project.reviewed_by = current_user.id
+            project.reviewed_at = datetime.utcnow()
+        if not project.booth_published:
+            project.booth_published = True
+            project.booth_published_at = datetime.utcnow()
+            notify_users(
+                db,
+                [project.created_by, project.supervisor_id],
+                f"Your project '{project.title}' is now live in the Virtual Booth.",
+                NotificationType.PROJECT_PUBLISHED,
+            )
+            notify_stakeholders(
+                db,
+                f"{current_user.full_name} published '{project.title}' to the Virtual Booth.",
+                NotificationType.PROJECT_PUBLISHED,
+            )
+    else:
+        project.booth_published = False
+
+    db.commit()
+    db.refresh(project)
+    return project
+
+
+@router.post("/{project_id}/contact")
+def contact_booth(
+    project_id: int,
+    data: BoothContact,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+    current_user: Optional[User] = Depends(get_optional_user),
+):
+    """Collaboration request from a Virtual Booth page. Open to anyone.
+
+    The supervisor and platform stakeholders get an in-app notification and the
+    InnoPark contact mailbox receives an email with the sender as reply-to.
+    """
+    project = db.query(Project).filter(Project.id == project_id).first()
+    if not project or not project.booth_published:
+        raise HTTPException(status_code=404, detail="Project not found")
+
+    sender = f"{data.name} ({data.email}" + (f", {data.organization}" if data.organization else "") + ")"
+    message = f"{sender} asked to collaborate on '{project.title}': {data.message}"
+
+    notify_stakeholders(db, message, NotificationType.CONTACT_REQUEST)
+    notify_user(db, project.supervisor_id, message, NotificationType.CONTACT_REQUEST)
+    db.commit()
+
+    background_tasks.add_task(
+        send_email,
+        settings.INNOPARK_CONTACT_EMAIL,
+        f"[InnoSpark] Booth collaboration request: {project.title}",
+        message,
+        reply_to=data.email,
+    )
+    return {
+        "message": "Your request was sent to the InnoPark team.",
+        "contact_email": settings.INNOPARK_CONTACT_EMAIL,
+    }
+
+
 @router.put("/{project_id}/media", response_model=ProjectResponse)
 def update_project_media(
     project_id: int,
     data: ProjectMediaUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_role(UserRole.ADMIN)),
+    current_user: User = Depends(get_current_user),
 ):
-    """Set the Virtual Booth video / demo / cover image. Admin only."""
+    """Set the Virtual Booth video / demo / cover image. Admin or the project's supervisor."""
     project = db.query(Project).filter(Project.id == project_id).first()
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
+    if not _can_review(current_user, project):
+        raise HTTPException(status_code=403, detail="Only the assigned supervisor or an admin can edit booth media")
 
     for field, value in data.model_dump(exclude_unset=True).items():
         setattr(project, field, value)
@@ -313,18 +435,20 @@ async def upload_project_files(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Upload files for a project. Videos may only be uploaded by an admin."""
+    """Upload files for a project. Videos may only be uploaded by an admin or the
+    project's supervisor (they become the Virtual Booth video)."""
     project = db.query(Project).filter(Project.id == project_id).first()
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
 
-    if current_user.id != project.created_by and current_user.role != UserRole.ADMIN:
+    can_manage = _can_review(current_user, project)
+    if current_user.id != project.created_by and not can_manage:
         raise HTTPException(status_code=403, detail="Not authorized")
 
-    if current_user.role != UserRole.ADMIN and any(is_video_filename(f.filename) for f in files):
+    if not can_manage and any(is_video_filename(f.filename) for f in files):
         raise HTTPException(
             status_code=403,
-            detail="Only an admin can upload Virtual Booth videos",
+            detail="Only an admin or the project's supervisor can upload Virtual Booth videos",
         )
 
     uploaded = []
@@ -333,15 +457,41 @@ async def upload_project_files(
         pf = ProjectFile(project_id=project_id, **file_meta)
         db.add(pf)
         uploaded.append(pf)
-        # An uploaded video becomes the Virtual Booth video (admin-only, checked above)
+        # An uploaded video becomes the Virtual Booth video (permission checked above);
+        # the first image becomes the cover when there is none yet.
         if pf.file_type == "video":
             project.video_url = public_file_url(project_id, file_meta["file_path"])
+        elif pf.file_type == "image" and not project.image_url:
+            project.image_url = public_file_url(project_id, file_meta["file_path"])
 
     db.commit()
     for pf in uploaded:
         db.refresh(pf)
 
     return uploaded
+
+
+@router.delete("/{project_id}/files/{file_id}", status_code=204)
+def delete_project_file(
+    project_id: int,
+    file_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Remove an uploaded file (admin or the project's supervisor)."""
+    pf = db.query(ProjectFile).filter(ProjectFile.id == file_id, ProjectFile.project_id == project_id).first()
+    if not pf:
+        raise HTTPException(status_code=404, detail="File not found")
+    if not _can_review(current_user, pf.project):
+        raise HTTPException(status_code=403, detail="Not authorized")
+
+    if pf.project.image_url == pf.url:
+        pf.project.image_url = None
+    if pf.project.video_url == pf.url:
+        pf.project.video_url = None
+    delete_file(pf.file_path)
+    db.delete(pf)
+    db.commit()
 
 
 @router.delete("/{project_id}", status_code=204)

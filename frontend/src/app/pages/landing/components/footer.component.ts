@@ -23,7 +23,7 @@ import { TranslateModule } from '@ngx-translate/core';
           <div class="footer-col">
             <h5>{{ 'LANDING.FOOTER.PLATFORM' | translate }}</h5>
             <ul>
-              <li><a routerLink="/projects">{{ 'LANDING.FOOTER.LINK_BOOTH' | translate }}</a></li>
+              <li><a routerLink="/booth">{{ 'LANDING.FOOTER.LINK_BOOTH' | translate }}</a></li>
               <li><a routerLink="/challenges">{{ 'LANDING.FOOTER.LINK_CHALLENGES' | translate }}</a></li>
               <li><a routerLink="/dashboard">{{ 'LANDING.FOOTER.LINK_MATCHER' | translate }}</a></li>
               <li><a routerLink="/pipeline">{{ 'LANDING.FOOTER.LINK_PIPELINE' | translate }}</a></li>

@@ -21,6 +21,7 @@ import { filter } from 'rxjs/operators';
 
         <div class="nav-links">
           <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">{{ 'NAV.HOME' | translate }}</a>
+          <a routerLink="/booth" routerLinkActive="active">{{ 'NAV.BOOTH' | translate }}</a>
           <a routerLink="/projects" routerLinkActive="active">{{ 'NAV.PROJECTS' | translate }}</a>
           <a routerLink="/challenges" routerLinkActive="active">{{ 'NAV.CHALLENGES' | translate }}</a>
           <a routerLink="/dashboard" routerLinkActive="active" *ngIf="authService.isLoggedIn()">{{ 'NAV.DASHBOARD' | translate }}</a>
@@ -75,7 +76,8 @@ import { filter } from 'rxjs/operators';
           <div class="footer-col">
             <h5>Platform</h5>
             <ul>
-              <li><a routerLink="/projects">Virtual Booth</a></li>
+              <li><a routerLink="/booth">Virtual Booth</a></li>
+              <li><a routerLink="/projects">Student Projects</a></li>
               <li><a routerLink="/challenges">Industry Challenges</a></li>
               <li><a routerLink="/dashboard">Dashboard</a></li>
             </ul>

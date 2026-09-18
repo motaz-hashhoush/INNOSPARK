@@ -1,7 +1,8 @@
 {
   "NAV": {
     "HOME": "Home",
-    "PROJECTS": "Virtual Booth",
+    "BOOTH": "Virtual Booth",
+    "PROJECTS": "Student Projects",
     "CHALLENGES": "Challenges",
     "DASHBOARD": "Dashboard",
     "PIPELINE": "Pipeline",
@@ -47,7 +48,7 @@
   "PROJECTS": {
     "TITLE": "Virtual Booth",
     "SUBTITLE": "Explore innovative graduation projects",
-    "SEARCH": "Search Virtual Booths...",
+    "SEARCH": "Search projects...",
     "FILTER_SECTOR": "Filter by Sector",
     "FILTER_READINESS": "Filter by Readiness",
     "ALL": "All",

@@ -22,6 +22,7 @@ export interface ProjectFile {
   file_type: string;
   file_size: number;
   uploaded_at: string;
+  url: string;
 }
 
 export interface Project {
@@ -37,6 +38,7 @@ export interface Project {
   sector: string;
   team_members: TeamMember[];
   supervisor_id: number;
+  supervisor?: User | null;
   technical_outputs: string;
   development_needs: string;
   attachment_url: string;
@@ -49,6 +51,8 @@ export interface Project {
   image_url?: string;
   video_url?: string;
   demo_url?: string;
+  booth_published: boolean;
+  booth_published_at?: string;
   created_by: number;
   created_at: string;
   updated_at: string;
@@ -81,6 +85,7 @@ export interface Match {
   created_at: string;
   project_title?: string;
   project_sector?: string;
+  project_booth_published?: boolean;
   challenge_title?: string;
 }
 

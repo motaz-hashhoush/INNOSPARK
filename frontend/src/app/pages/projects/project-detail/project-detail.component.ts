@@ -6,7 +6,6 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ApiService } from '../../../core/services/api.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { Project } from '../../../models/interfaces';
-import { environment } from '../../../../environments/environment';
 import { RevealDirective } from '../../../shared/directives/reveal.directive';
 
 @Component({
@@ -20,7 +19,7 @@ import { RevealDirective } from '../../../shared/directives/reveal.directive';
 
       <div class="container">
         <header class="detail-header">
-          <div appReveal><a routerLink="/projects" class="back-link">← Virtual Booth</a></div>
+          <div appReveal><a routerLink="/projects" class="back-link">← Student Projects</a></div>
           
           <div class="header-main" style="margin-top: 32px;">
             <div appReveal [delay]="80">
@@ -34,7 +33,10 @@ import { RevealDirective } from '../../../shared/directives/reveal.directive';
                 {{ displayTitle }}
               </h1>
               <p class="pending-note" *ngIf="project.approval_status !== 'approved'">
-                ⏳ This project is {{ project.approval_status }} — it is not published to the Virtual Booth yet.
+                ⏳ This project is {{ project.approval_status }} — approve it in the Review queue or publish it to the Virtual Booth.
+              </p>
+              <p class="pending-note booth-note" *ngIf="project.booth_published">
+                🎪 Live in the Virtual Booth since {{ project.booth_published_at | date:'mediumDate' }}.
               </p>
             </div>
             
@@ -42,7 +44,11 @@ import { RevealDirective } from '../../../shared/directives/reveal.directive';
               <a *ngIf="project.attachment_url" [href]="project.attachment_url" target="_blank" class="btn btn-primary">
                 View Project Files
               </a>
-              <button class="btn btn-outline" *ngIf="authService.isLoggedIn()">Save to Interests</button>
+              <a *ngIf="project.booth_published" [routerLink]="['/booth', project.id]" class="btn btn-outline">Open in Booth</a>
+              <button class="btn" [class.btn-primary]="!project.booth_published" [class.btn-outline]="project.booth_published"
+                *ngIf="canEdit" (click)="togglePublish()" [disabled]="publishing">
+                {{ publishing ? 'Saving…' : (project.booth_published ? 'Unpublish from Booth' : 'Publish to Booth') }}
+              </button>
               <button class="btn btn-outline" *ngIf="canEdit" (click)="toggleEdit()">
                 {{ editing ? 'Cancel edit' : 'Edit project' }}
               </button>
@@ -57,7 +63,7 @@ import { RevealDirective } from '../../../shared/directives/reveal.directive';
               <h2 class="h-card">Edit project</h2>
               <form class="edit-form" (ngSubmit)="saveEdit()">
                 <label>Title<input type="text" [(ngModel)]="editDraft.title" name="title" required></label>
-                <label>Summary<textarea [(ngModel)]="editDraft.summary" name="summary" rows="3"></textarea></label>
+                <label>Proposed solution / summary<textarea [(ngModel)]="editDraft.summary" name="summary" rows="3"></textarea></label>
                 <label>Problem<textarea [(ngModel)]="editDraft.problem" name="problem" rows="3" required></textarea></label>
                 <label>Innovation &amp; value<textarea [(ngModel)]="editDraft.value_proposition" name="value_proposition" rows="3"></textarea></label>
                 <label>Technical outputs<textarea [(ngModel)]="editDraft.technical_outputs" name="technical_outputs" rows="3"></textarea></label>
@@ -90,10 +96,10 @@ import { RevealDirective } from '../../../shared/directives/reveal.directive';
             </section>
 
             <!-- Virtual Booth: video + demo of the graduation project -->
-            <section class="glass section media-section" *ngIf="project.video_url || project.demo_url || authService.hasRole('admin')">
+            <section class="glass section media-section" *ngIf="project.video_url || project.demo_url || canEdit">
               <div class="section-head">
                 <h2 class="h-card">Video &amp; Demo</h2>
-                <button class="link-btn" *ngIf="authService.hasRole('admin')" (click)="editingMedia = !editingMedia">
+                <button class="link-btn" *ngIf="canEdit" (click)="editingMedia = !editingMedia">
                   {{ editingMedia ? 'Cancel' : 'Edit media' }}
                 </button>
               </div>
@@ -106,8 +112,8 @@ import { RevealDirective } from '../../../shared/directives/reveal.directive';
                 No video or demo has been uploaded for this project yet.
               </p>
 
-              <!-- Only the admin can publish booth media -->
-              <div class="media-form" *ngIf="editingMedia && authService.hasRole('admin')">
+              <!-- Admin or the project's supervisor curate booth media -->
+              <div class="media-form" *ngIf="editingMedia && canEdit">
                 <label>Upload video (mp4 / webm)
                   <input type="file" accept="video/mp4,video/webm" (change)="uploadVideo($event)" [disabled]="uploadingVideo">
                 </label>
@@ -149,6 +155,19 @@ import { RevealDirective } from '../../../shared/directives/reveal.directive';
           </main>
 
           <aside class="sidebar" appReveal [delay]="260">
+            <div class="glass side-card" *ngIf="project.supervisor">
+              <h3 class="h-card" style="font-size: 14px;">Supervisor</h3>
+              <div class="team-list">
+                <div class="team-member">
+                  <div class="avatar">{{ project.supervisor.full_name.charAt(0) | uppercase }}</div>
+                  <div class="info">
+                    <span class="name">{{ project.supervisor.full_name }}</span>
+                    <span class="role">{{ project.supervisor.email }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div class="glass side-card">
               <h3 class="h-card" style="font-size: 14px;">Innovation Team</h3>
               <div class="team-list">
@@ -166,7 +185,7 @@ import { RevealDirective } from '../../../shared/directives/reveal.directive';
             <div class="glass side-card" *ngIf="project.files?.length">
               <h3 class="h-card" style="font-size: 14px;">Documents</h3>
               <div class="doc-list">
-                <a *ngFor="let f of project.files" [href]="getFileUrl(f.id)" target="_blank" class="doc-item">
+                <a *ngFor="let f of project.files" [href]="f.url" target="_blank" class="doc-item">
                   <span class="icon">📄</span>
                   <span class="fname">{{ f.file_name }}</span>
                 </a>
@@ -208,6 +227,8 @@ import { RevealDirective } from '../../../shared/directives/reveal.directive';
     .section p { color: var(--c-text-mute); line-height: 1.8; font-size: 15px; }
 
     .pending-note { margin-top: 10px; font-size: 13px; font-weight: 600; color: #a16207; }
+    .booth-note { color: #15803d; }
+    .actions { display: flex; gap: 10px; flex-wrap: wrap; }
 
     .media-section { display: flex; flex-direction: column; gap: 16px; }
     .booth-video { width: 100%; border-radius: 20px; background: #0a1b3d; max-height: 460px; }
@@ -258,6 +279,8 @@ export class ProjectDetailComponent implements OnInit {
   mediaError = '';
   mediaDraft: { video_url?: string; demo_url?: string; image_url?: string } = {};
   uploadingVideo = false;
+
+  publishing = false;
 
   // Project editing — supervisor of this project, or admin
   editing = false;
@@ -317,6 +340,19 @@ export class ProjectDetailComponent implements OnInit {
       error: (err) => {
         this.uploadingVideo = false;
         this.mediaError = err?.error?.detail || 'Could not upload the video. Please try again.';
+      },
+    });
+  }
+
+  /** Publish to / withdraw from the Virtual Booth. Publishing also approves a pending project. */
+  togglePublish(): void {
+    if (!this.project) return;
+    this.publishing = true;
+    this.api.publishBooth(this.project.id, !this.project.booth_published).subscribe({
+      next: (p) => { this.project = p; this.publishing = false; },
+      error: (err) => {
+        this.publishing = false;
+        this.editError = err?.error?.detail || 'Could not update the booth state.';
       },
     });
   }
@@ -389,9 +425,5 @@ export class ProjectDetailComponent implements OnInit {
       const role = typeof m === 'string' ? '' : (m?.role || '');
       return { name, role, initial: name ? name.charAt(0).toUpperCase() : '?' };
     }).filter(m => m.name !== '');
-  }
-
-  getFileUrl(fileId: number): string {
-    return `${environment.apiUrl.replace('/api', '')}/uploads/${this.project?.id}`;
   }
 }

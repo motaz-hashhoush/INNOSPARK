@@ -122,7 +122,7 @@ function getOrCreateSessionToken(): string {
               </p>
               <div style="display: flex; gap: 12px; justify-content: center; margin-top: 20px;">
                 <button class="btn btn-primary btn-sm" (click)="toggleForm()">Edit Challenge</button>
-                <a routerLink="/projects" class="btn btn-outline btn-sm">Browse All Projects</a>
+                <a routerLink="/booth" class="btn btn-outline btn-sm">Browse the Virtual Booth</a>
               </div>
             </div>
 
@@ -137,7 +137,7 @@ function getOrCreateSessionToken(): string {
                   <h3 class="title">{{ m.project_title }}</h3>
                   <p class="reason" *ngIf="m.match_reason">{{ m.match_reason }}</p>
                   <div class="actions">
-                    <a [routerLink]="['/projects', m.project_id]" class="btn btn-primary btn-sm">Details</a>
+                    <a [routerLink]="[m.project_booth_published ? '/booth' : '/projects', m.project_id]" class="btn btn-primary btn-sm">Details</a>
                   </div>
                 </div>
               </article>
@@ -148,7 +148,7 @@ function getOrCreateSessionToken(): string {
               <p style="margin: 12px 0 24px; color: var(--c-text-mute);">Register now to contact these teams and start a collaboration.</p>
               <div style="display: flex; gap: 12px; justify-content: center;">
                 <a routerLink="/auth/register" class="btn btn-primary">Create Account</a>
-                <a routerLink="/projects" class="btn btn-outline">Browse All</a>
+                <a routerLink="/booth" class="btn btn-outline">Browse All</a>
               </div>
             </div>
           </div>
