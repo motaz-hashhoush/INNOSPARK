@@ -7,6 +7,10 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/landing/landing.component').then(m => m.LandingComponent),
   },
   {
+    path: 'match',
+    loadComponent: () => import('./pages/guest-match/guest-matcher.component').then(m => m.GuestMatcherComponent),
+  },
+  {
     path: 'auth/login',
     loadComponent: () => import('./pages/auth/login/login.component').then(m => m.LoginComponent),
   },

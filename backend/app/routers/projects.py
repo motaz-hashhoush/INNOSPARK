@@ -12,7 +12,7 @@ from app.schemas.project import (
     ProjectFileResponse, ProjectMediaUpdate, ProjectReview,
 )
 from app.services.file_service import save_upload_file, delete_file, is_video_filename, public_file_url
-from app.services.ai_matching import embed_project, classify_readiness
+from app.services.ai_matching import embed_project_bg, classify_readiness
 from app.services.notification_service import notify_stakeholders, notify_user
 from app.services.translation_service import generate_bilingual_descriptions
 from app.utils.deps import get_current_user, get_optional_user, require_role
@@ -66,13 +66,8 @@ def create_project(
     db.commit()
     db.refresh(project)
 
-    # Auto-classify readiness and generate embedding
+    # Auto-classify readiness and generate embedding in background
     project.readiness_level = classify_readiness(project)
-    try:
-        embed_project(db, project)
-    except Exception:
-        pass  # AI model not available — skip embedding
-
     # The supervisor reviews and approves before the project is published
     notify_user(
         db,
@@ -83,6 +78,7 @@ def create_project(
     db.commit()
     db.refresh(project)
 
+    background_tasks.add_task(embed_project_bg, project.id)
     # Auto-generate Arabic + English titles and descriptions in the background
     background_tasks.add_task(generate_bilingual_descriptions, project.id)
 
@@ -138,6 +134,40 @@ def list_projects(
     projects = query.order_by(Project.created_at.desc()).offset(skip).limit(limit).all()
 
     return ProjectListResponse(projects=projects, total=total)
+
+
+@router.get("/search", response_model=ProjectListResponse)
+def semantic_search_projects(
+    q: str,
+    sector: Optional[str] = None,
+    readiness: Optional[ReadinessLevel] = None,
+    limit: int = 20,
+    db: Session = Depends(get_db),
+):
+    """Semantic search using AI embeddings. Falls back to text search if model unavailable."""
+    if not q or len(q.strip()) < 2:
+        return list_projects(sector=sector, readiness=readiness, limit=limit, db=db)
+
+    try:
+        from app.services.ai_matching import generate_embedding, compute_similarity
+        embedding = generate_embedding(q.strip())
+
+        query = db.query(Project).filter(Project.embedding.isnot(None))
+        if sector:
+            query = query.filter(Project.sector.ilike(f"%{sector}%"))
+        if readiness:
+            query = query.filter(Project.readiness_level == readiness)
+
+        projects = query.all()
+        scored = sorted(
+            [(p, compute_similarity(embedding, p.embedding)) for p in projects],
+            key=lambda x: x[1], reverse=True,
+        )
+        top = [p for p, _ in scored[:limit]]
+        return ProjectListResponse(projects=top, total=len(top))
+
+    except Exception:
+        return list_projects(search=q, sector=sector, readiness=readiness, limit=limit, db=db)
 
 
 @router.get("/{project_id}", response_model=ProjectResponse)
@@ -244,13 +274,10 @@ def update_project(
             value = [m.model_dump() if hasattr(m, 'model_dump') else m for m in value]
         setattr(project, field, value)
 
-    # Re-embed if text fields changed
+    # Re-embed if text fields changed in background
     text_fields = {"title", "summary", "problem", "value_proposition", "technical_outputs"}
     if text_fields & set(update_data.keys()):
-        try:
-            embed_project(db, project)
-        except Exception:
-            pass
+        background_tasks.add_task(embed_project_bg, project.id)
 
     # Stakeholders are alerted about supervisor edits (validation notes: admin
     # must be notified of any modification made by a supervisor).

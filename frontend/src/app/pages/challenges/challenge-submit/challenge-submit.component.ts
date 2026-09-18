@@ -43,8 +43,8 @@ import { RevealDirective } from '../../../shared/directives/reveal.directive';
               </div>
 
               <div class="field full">
-                <label>Detailed Description *</label>
-                <textarea [(ngModel)]="challenge.description" name="description" rows="5" required placeholder="Describe the pain points and current status..."></textarea>
+                <label>Detailed Description <span class="opt">optional</span></label>
+                <textarea [(ngModel)]="challenge.description" name="description" rows="5" placeholder="Describe the pain points and current status..."></textarea>
               </div>
 
               <div class="field">
@@ -76,7 +76,7 @@ import { RevealDirective } from '../../../shared/directives/reveal.directive';
               <div class="error-msg" *ngIf="error">{{ error }}</div>
               <div class="action-row">
                 <button type="submit" class="btn btn-primary btn-lg" [disabled]="loading">
-                  {{ loading ? 'Posting...' : 'Post Challenge' }}
+                  {{ loading ? 'Matching...' : 'Find Matches' }}
                 </button>
                 <a routerLink="/challenges" class="btn btn-ghost">Cancel</a>
               </div>
@@ -108,6 +108,7 @@ import { RevealDirective } from '../../../shared/directives/reveal.directive';
     @media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } .field.full { grid-column: span 1; } .form-card { padding: 24px; } }
 
     .field label { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--c-text-faint); margin-bottom: 8px; }
+    .opt { font-size: 10px; font-weight: 500; text-transform: none; letter-spacing: 0; color: var(--c-text-faint); opacity: 0.65; margin-left: 6px; }
     .field input, .field select, .field textarea { 
       width: 100%; background: rgba(255,255,255,0.8); border: 1px solid var(--c-line-soft); 
       border-radius: 12px; padding: 12px 16px; font-size: 15px; color: var(--c-text); outline: none; 
@@ -140,22 +141,42 @@ export class ChallengeSubmitComponent {
   ) {}
 
   onSubmit(): void {
-    if (!this.challenge.title || !this.challenge.description) {
-      this.error = 'Title and Description are required.';
+    if (!this.challenge.title) {
+      this.error = 'Title is required.';
       return;
     }
     this.loading = true;
     this.error = '';
-    this.api.createChallenge(this.challenge).subscribe({
-      next: () => {
-        this.loading = false;
-        if (this.authService.isLoggedIn()) {
-          this.router.navigate(['/challenges']);
-        } else {
+
+    if (!this.authService.isLoggedIn()) {
+      // Guest: Call guest match directly and save to session
+      const sessionToken = this.getOrCreateSessionToken();
+      this.api.guestMatch({ ...this.challenge, session_token: sessionToken }).subscribe({
+        next: (res: any) => {
+          sessionStorage.setItem('innospark_guest_data', JSON.stringify(res));
+          this.loading = false;
           this.router.navigate(['/match']);
-        }
-      },
-      error: (err: any) => { this.loading = false; this.error = err.error?.detail || 'Failed to submit'; },
-    });
+        },
+        error: (err: any) => { this.loading = false; this.error = err.error?.detail || 'Failed to match'; }
+      });
+    } else {
+      // Logged in: Create properly
+      this.api.createChallenge(this.challenge).subscribe({
+        next: (created: any) => {
+          this.loading = false;
+          this.router.navigate(['/challenges'], { queryParams: { submitted: '1' } });
+        },
+        error: (err: any) => { this.loading = false; this.error = err.error?.detail || 'Failed to submit'; },
+      });
+    }
+  }
+
+  private getOrCreateSessionToken(): string {
+    let token = sessionStorage.getItem('innospark_guest_session');
+    if (!token) {
+      token = crypto.randomUUID();
+      sessionStorage.setItem('innospark_guest_session', token);
+    }
+    return token;
   }
 }

@@ -16,7 +16,7 @@ import { filter } from 'rxjs/operators';
       <div class="container nav-inner">
         <a routerLink="/" class="nav-logo">
           <div class="dot"></div>
-          INNOSPARK
+          InnoSpark
         </a>
 
         <div class="nav-links">
@@ -65,7 +65,7 @@ import { filter } from 'rxjs/operators';
           <div>
             <a routerLink="/" class="nav-logo">
               <div class="dot"></div>
-              INNOSPARK
+              InnoSpark
             </a>
             <p class="footer-bio">
               The digital innovation infrastructure of An‑Najah Innovation Park,
@@ -100,7 +100,7 @@ import { filter } from 'rxjs/operators';
           </div>
         </div>
         <div class="footer-bottom">
-          <span>© 2026 INNOSPARK · An‑Najah Innovation Park · Nablus, Palestine</span>
+          <span>© 2026 InnoSpark · An‑Najah Innovation Park · Nablus, Palestine</span>
           <span class="anu">Powered by An‑Najah National University</span>
         </div>
       </div>

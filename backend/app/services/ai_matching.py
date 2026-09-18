@@ -17,10 +17,13 @@ Pipeline (see find_matches):
     stage-1 ordering when the LLM is unavailable.
 """
 import logging
+import os
 from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 from sqlalchemy.orm import Session
+
+os.environ.setdefault("TOKENIZERS_PARALLELISM", "false")
 
 from app.config import settings
 from app.models.project import ApprovalStatus, Project, ReadinessLevel
@@ -42,7 +45,7 @@ def _get_model():
         try:
             from sentence_transformers import SentenceTransformer
             logger.info(f"Loading AI model: {settings.AI_MODEL_NAME}")
-            _model = SentenceTransformer(settings.AI_MODEL_NAME)
+            _model = SentenceTransformer(settings.AI_MODEL_NAME, device="cpu")
             _model.max_seq_length = settings.AI_MAX_SEQ_LENGTH
             logger.info(f"AI model loaded successfully with max_seq_length: {settings.AI_MAX_SEQ_LENGTH}")
         except Exception as e:
@@ -99,8 +102,24 @@ def embed_project(db: Session, project: Project) -> Project:
     if text.strip():
         project.embedding = generate_embedding(text)
         db.commit()
-        db.refresh(project)
     return project
+
+
+def embed_project_bg(project_id: int) -> None:
+    """Background-safe version: opens its own DB session to embed a project."""
+    from app.database import SessionLocal
+    db = SessionLocal()
+    try:
+        project = db.query(Project).filter(Project.id == project_id).first()
+        if project:
+            text = build_project_text(project)
+            if text.strip():
+                project.embedding = generate_embedding(text)
+                db.commit()
+    except Exception as e:
+        logger.error(f"Background embed_project failed for id={project_id}: {e}")
+    finally:
+        db.close()
 
 
 def embed_challenge(db: Session, challenge: Challenge) -> Challenge:
@@ -109,8 +128,24 @@ def embed_challenge(db: Session, challenge: Challenge) -> Challenge:
     if text.strip():
         challenge.embedding = generate_embedding(text)
         db.commit()
-        db.refresh(challenge)
     return challenge
+
+
+def embed_challenge_bg(challenge_id: int) -> None:
+    """Background-safe version: opens its own DB session to embed a challenge."""
+    from app.database import SessionLocal
+    db = SessionLocal()
+    try:
+        challenge = db.query(Challenge).filter(Challenge.id == challenge_id).first()
+        if challenge:
+            text = build_challenge_text(challenge)
+            if text.strip():
+                challenge.embedding = generate_embedding(text)
+                db.commit()
+    except Exception as e:
+        logger.error(f"Background embed_challenge failed for id={challenge_id}: {e}")
+    finally:
+        db.close()
 
 
 def classify_readiness(project: Project) -> ReadinessLevel:

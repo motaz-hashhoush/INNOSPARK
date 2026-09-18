@@ -85,8 +85,8 @@ def guest_match(
         id=0,  # Mock ID
         company_id=0,
         title=data.title,
-        description=data.description,
-        sector=data.sector,
+        description=data.description or "",
+        sector=data.sector or "other",
         priorities=data.priorities,
         expected_outputs=data.expected_outputs,
         budget=None,

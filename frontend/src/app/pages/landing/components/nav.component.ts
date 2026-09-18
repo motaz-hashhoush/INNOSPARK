@@ -12,7 +12,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
       <div class="container nav-inner">
         <a routerLink="/" class="nav-logo">
           <div class="dot"></div>
-          INNOSPARK
+          InnoSpark
         </a>
 
         <div class="nav-links">

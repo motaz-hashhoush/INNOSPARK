@@ -7,8 +7,8 @@ from app.models.challenge import ChallengeStatus
 
 class ChallengeCreate(BaseModel):
     title: str
-    description: str
-    sector: Sector
+    description: Optional[str] = None
+    sector: Optional[Sector] = Sector.OTHER
     priorities: Optional[str] = None
     expected_outputs: Optional[str] = None
     is_public: bool = True
@@ -16,8 +16,8 @@ class ChallengeCreate(BaseModel):
 
 class GuestChallengeCreate(BaseModel):
     title: str
-    description: str
-    sector: Sector
+    description: Optional[str] = None
+    sector: Optional[Sector] = None
     priorities: Optional[str] = None
     expected_outputs: Optional[str] = None
     session_token: str  # browser-generated UUID
@@ -35,7 +35,7 @@ class ChallengeUpdate(BaseModel):
 
 class ChallengeResponse(BaseModel):
     id: int
-    company_id: int
+    company_id: Optional[int] = None
     title: str
     description: str
     sector: Sector

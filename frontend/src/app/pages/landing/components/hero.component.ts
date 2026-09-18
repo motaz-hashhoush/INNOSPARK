@@ -54,7 +54,7 @@ interface Particle {
         </div>
 
         <div appReveal [delay]="120">
-          <h1 #wordmark class="wordmark">INNOSPARK</h1>
+          <h1 #wordmark class="wordmark">InnoSpark</h1>
         </div>
 
         <div appReveal [delay]="240">
@@ -130,10 +130,10 @@ interface Particle {
     .wordmark {
       font-family: var(--serif);
       font-weight: 800;
-      font-size: clamp(72px, 14vw, 220px);
-      line-height: 0.85;
+      font-size: clamp(56px, 10vw, 160px);
+      line-height: 0.9;
       letter-spacing: -0.045em;
-      background: linear-gradient(180deg, var(--c-royal) 0%, var(--c-blue) 50%, var(--c-azure) 100%);
+      background: linear-gradient(180deg, #ffffff 0%, var(--c-azure) 100%);
       -webkit-background-clip: text;
       background-clip: text;
       color: transparent;
@@ -141,6 +141,15 @@ interface Particle {
       position: relative;
       display: inline-block;
       transition: transform 0.1s ease-out;
+      text-align: center;
+    }
+    .wordmark-hub {
+      display: block;
+      background: linear-gradient(180deg, var(--c-azure) 0%, var(--c-blue) 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      font-size: clamp(72px, 14vw, 220px);
     }
     .wordmark::after {
       content: ""; position: absolute; left: 50%; bottom: -8%; transform: translateX(-50%);

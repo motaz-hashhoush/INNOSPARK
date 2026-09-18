@@ -17,7 +17,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 app = FastAPI(
-    title="INNOSPARK API",
+    title="innoPark API",
     description="Platform for showcasing university graduation projects and AI-powered matching with industry challenges",
     version="1.0.0",
     docs_url="/docs",
@@ -27,7 +27,15 @@ app = FastAPI(
 # CORS configuration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:4200", "http://127.0.0.1:4200", "*"],
+    allow_origins=[
+        "http://localhost:4200",
+        "http://127.0.0.1:4200",
+        "https://localhost",
+        "http://93.127.132.59",
+        "https://93.127.132.59",
+        "http://innohub.najah.ai",
+        "https://innohub.najah.ai",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -64,7 +72,7 @@ def startup_event():
 @app.get("/", tags=["Health"])
 def root():
     return {
-        "name": "INNOSPARK API",
+        "name": "innoPark API",
         "version": "1.0.0",
         "status": "running",
         "docs": "/docs",

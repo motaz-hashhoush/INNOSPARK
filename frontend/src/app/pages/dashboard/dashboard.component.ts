@@ -21,7 +21,7 @@ Chart.register(...registerables);
           <div appReveal><span class="kicker">Ecosystem Analytics</span></div>
           <div appReveal [delay]="80" style="margin-top: 18px;">
             <h1 class="h-section">Platform <em class="serif-italic" style="color: var(--c-blue);">Insights</em>.</h1>
-            <p class="lead">Monitoring the growth and health of the INNOSPARK innovation pipeline.</p>
+            <p class="lead">Monitoring the growth and health of the innoPark innovation pipeline.</p>
           </div>
         </header>
 
